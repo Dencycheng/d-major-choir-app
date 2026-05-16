@@ -1,0 +1,379 @@
+{
+  "choir": {
+    "id": "choir-d-major",
+    "name": "D大调合唱团",
+    "subtitle": "数字排练空间",
+    "city": "上海",
+    "season": "2026 春夏排练季"
+  },
+  "sections": [
+    {
+      "code": "S",
+      "name": "女高",
+      "englishName": "Soprano",
+      "color": "#C69F62",
+      "leader": "周亦"
+    },
+    {
+      "code": "A",
+      "name": "女低",
+      "englishName": "Alto",
+      "color": "#4C6D93",
+      "leader": "陈声"
+    },
+    {
+      "code": "T",
+      "name": "男高",
+      "englishName": "Tenor",
+      "color": "#4E8A63",
+      "leader": "梁远"
+    },
+    {
+      "code": "B",
+      "name": "男低",
+      "englishName": "Bass",
+      "color": "#111111",
+      "leader": "何宁"
+    }
+  ],
+  "members": [
+    {
+      "id": "m-sop-01",
+      "name": "周亦",
+      "section": "S",
+      "role": "声部长",
+      "status": "正式",
+      "voiceRange": "C4-A5",
+      "attendance": 94
+    },
+    {
+      "id": "m-sop-02",
+      "name": "许诺",
+      "section": "S",
+      "role": "成员",
+      "status": "正式",
+      "voiceRange": "D4-G5",
+      "attendance": 88
+    },
+    {
+      "id": "m-alto-01",
+      "name": "林安",
+      "section": "A",
+      "role": "成员",
+      "status": "正式",
+      "voiceRange": "A3-E5",
+      "attendance": 91
+    },
+    {
+      "id": "m-alto-02",
+      "name": "陈声",
+      "section": "A",
+      "role": "声部长",
+      "status": "正式",
+      "voiceRange": "G3-D5",
+      "attendance": 86
+    },
+    {
+      "id": "m-tenor-01",
+      "name": "梁远",
+      "section": "T",
+      "role": "声部长",
+      "status": "正式",
+      "voiceRange": "C3-A4",
+      "attendance": 74
+    },
+    {
+      "id": "m-tenor-02",
+      "name": "韩澈",
+      "section": "T",
+      "role": "成员",
+      "status": "正式",
+      "voiceRange": "D3-G4",
+      "attendance": 69
+    },
+    {
+      "id": "m-bass-01",
+      "name": "何宁",
+      "section": "B",
+      "role": "声部长",
+      "status": "正式",
+      "voiceRange": "E2-E4",
+      "attendance": 84
+    },
+    {
+      "id": "m-bass-02",
+      "name": "顾北",
+      "section": "B",
+      "role": "成员",
+      "status": "正式",
+      "voiceRange": "F2-D4",
+      "attendance": 81
+    },
+    {
+      "id": "m-candidate-01",
+      "name": "唐一",
+      "section": "UNASSIGNED",
+      "role": "候选",
+      "status": "候选",
+      "voiceRange": "待测",
+      "attendance": 0
+    }
+  ],
+  "events": [
+    {
+      "id": "event-01",
+      "title": "周四晚间排练",
+      "type": "常规排练",
+      "time": "2026-05-14 19:30",
+      "location": "珠江新城排练室 A",
+      "agenda": "《月光》第17-32小节声部平衡，复核第24小节入口。",
+      "response": "待反馈",
+      "needAttendance": true
+    },
+    {
+      "id": "event-02",
+      "title": "周日加排",
+      "type": "加排",
+      "time": "2026-05-17 15:00",
+      "location": "星海音乐厅排练厅",
+      "agenda": "《春之声》全曲连排，检查服装要求。",
+      "response": "已请假",
+      "needAttendance": true
+    }
+  ],
+  "attendance": [
+    {
+      "id": "a-01",
+      "eventId": "event-01",
+      "memberId": "m-sop-01",
+      "status": "已签到",
+      "method": "二维码",
+      "time": "2026-05-14T11:22:00.000Z"
+    },
+    {
+      "id": "a-02",
+      "eventId": "event-01",
+      "memberId": "m-sop-02",
+      "status": "已签到",
+      "method": "二维码",
+      "time": "2026-05-14T11:24:00.000Z"
+    },
+    {
+      "id": "a-03",
+      "eventId": "event-01",
+      "memberId": "m-alto-02",
+      "status": "已签到",
+      "method": "二维码",
+      "time": "2026-05-14T11:25:00.000Z"
+    },
+    {
+      "id": "a-04",
+      "eventId": "event-01",
+      "memberId": "m-tenor-01",
+      "status": "迟到",
+      "method": "手动",
+      "time": "2026-05-14T11:45:00.000Z"
+    },
+    {
+      "id": "a-05",
+      "eventId": "event-01",
+      "memberId": "m-tenor-02",
+      "status": "缺勤",
+      "method": "系统",
+      "time": ""
+    },
+    {
+      "id": "a-06",
+      "eventId": "event-01",
+      "memberId": "m-bass-01",
+      "status": "已签到",
+      "method": "二维码",
+      "time": "2026-05-14T11:21:00.000Z"
+    },
+    {
+      "id": "a-07",
+      "eventId": "event-01",
+      "memberId": "m-bass-02",
+      "status": "请假",
+      "method": "审批",
+      "time": ""
+    }
+  ],
+  "works": [
+    {
+      "id": "work-moon",
+      "title": "月光",
+      "composer": "Debussy / 合唱改编",
+      "status": "排练中",
+      "readiness": 78,
+      "weakSpot": "第24小节 Alto 入口",
+      "favorite": false,
+      "copyright": "内部排练使用"
+    },
+    {
+      "id": "work-dmisa",
+      "title": "大调弥撒",
+      "composer": "Haydn",
+      "status": "新版谱",
+      "readiness": 63,
+      "weakSpot": "Tenor 音准稳定性",
+      "favorite": true,
+      "copyright": "已授权"
+    },
+    {
+      "id": "work-spring",
+      "title": "春之声",
+      "composer": "Johann Strauss",
+      "status": "已收藏",
+      "readiness": 86,
+      "weakSpot": "结尾渐弱层次",
+      "favorite": true,
+      "copyright": "内部排练使用"
+    },
+    {
+      "id": "work-ave",
+      "title": "安魂曲选段",
+      "composer": "Mozart",
+      "status": "识谱中",
+      "readiness": 51,
+      "weakSpot": "Bass 咬字",
+      "favorite": false,
+      "copyright": "待确认"
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-01",
+      "workId": "work-moon",
+      "title": "总谱 PDF",
+      "type": "总谱",
+      "section": "ALL",
+      "version": "v3",
+      "visibility": "全团可见"
+    },
+    {
+      "id": "r-02",
+      "workId": "work-moon",
+      "title": "A 声部示范",
+      "type": "分声部示范",
+      "section": "A",
+      "version": "mp3",
+      "visibility": "本声部"
+    },
+    {
+      "id": "r-03",
+      "workId": "work-moon",
+      "title": "钢琴伴奏",
+      "type": "伴奏",
+      "section": "ALL",
+      "version": "m4a",
+      "visibility": "全团可见"
+    },
+    {
+      "id": "r-04",
+      "workId": "work-spring",
+      "title": "排练录音 05-09",
+      "type": "排练录音",
+      "section": "ALL",
+      "version": "m4a",
+      "visibility": "全团可见"
+    }
+  ],
+  "practiceTasks": [
+    {
+      "id": "task-01",
+      "title": "《月光》女低声部复练",
+      "workId": "work-moon",
+      "workTitle": "月光",
+      "segment": "第17-32小节",
+      "targetSections": [
+        "A"
+      ],
+      "deadline": "2026-05-16 22:00",
+      "requiredCount": 2,
+      "brief": "跟唱女低示范音频，录制第17-32小节，注意第24小节和声入口。",
+      "status": "进行中"
+    },
+    {
+      "id": "task-02",
+      "title": "《春之声》全团连贯性练习",
+      "workId": "work-spring",
+      "workTitle": "春之声",
+      "segment": "全曲",
+      "targetSections": [
+        "S",
+        "A",
+        "T",
+        "B"
+      ],
+      "deadline": "2026-05-18 20:00",
+      "requiredCount": 1,
+      "brief": "关注结尾渐弱和统一换气，提交一次完整录音即可。",
+      "status": "未开始"
+    }
+  ],
+  "practiceRecords": [
+    {
+      "id": "pr-01",
+      "taskId": "task-01",
+      "memberId": "m-alto-02",
+      "memberName": "陈声",
+      "section": "A",
+      "duration": 162,
+      "selfRating": "音准：一般；节奏：稳定；气息：有点紧",
+      "needHelp": true,
+      "status": "需复练",
+      "submittedAt": "2026-05-13T12:20:00.000Z",
+      "feedback": "音准整体稳定，下一次重点听第24小节入口。",
+      "tags": [
+        "音准",
+        "入口"
+      ],
+      "commentedBy": "陈声部长",
+      "commentedAt": "2026-05-13T21:51:03.779Z"
+    },
+    {
+      "id": "pr-02",
+      "taskId": "task-01",
+      "memberId": "m-sop-01",
+      "memberName": "周亦",
+      "section": "S",
+      "duration": 149,
+      "selfRating": "音准：稳定；节奏：稳定；气息：顺畅",
+      "needHelp": false,
+      "status": "已点评",
+      "submittedAt": "2026-05-13T10:10:00.000Z",
+      "feedback": "整体很稳，下一次只需把第28小节收尾再放轻一点。",
+      "tags": [
+        "气息",
+        "收尾"
+      ]
+    },
+    {
+      "id": "pr-03",
+      "taskId": "task-02",
+      "memberId": "m-tenor-02",
+      "memberName": "韩澈",
+      "section": "T",
+      "duration": 184,
+      "selfRating": "音准：一般；节奏：偏快；气息：一般",
+      "needHelp": true,
+      "status": "需复练",
+      "submittedAt": "2026-05-12T09:30:00.000Z",
+      "feedback": "音准整体稳定，下一次重点听第24小节入口。",
+      "tags": [
+        "音准",
+        "入口"
+      ],
+      "commentedBy": "陈声部长",
+      "commentedAt": "2026-05-13T21:51:04.606Z"
+    }
+  ],
+  "feedbackTemplates": [
+    "音准整体稳定，下一次重点听第24小节入口。",
+    "节奏已基本稳定，副歌第3句再放慢两遍。",
+    "气息有点紧，先用半速跟伴奏练两次。",
+    "咬字清楚很多，注意收尾不要抢拍。",
+    "建议线下排练时和同声部一起对齐入口。"
+  ]
+}

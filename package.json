@@ -1,0 +1,16 @@
+{
+  "name": "d-major-choir-hub",
+  "version": "1.0.0",
+  "description": "D大调合唱团数字团务与练习系统 MVP",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "choir",
+    "practice",
+    "dashboard"
+  ],
+  "author": "",
+  "license": "UNLICENSED"
+}
