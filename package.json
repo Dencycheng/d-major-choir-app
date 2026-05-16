@@ -4,7 +4,10 @@
   "description": "D大调合唱团数字团务与练习系统 MVP",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "migrate": "node scripts/migrate.js",
+    "seed": "node scripts/seed.js",
+    "smoke": "node scripts/smoke-test.js"
   },
   "keywords": [
     "choir",

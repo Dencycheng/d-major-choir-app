@@ -249,7 +249,9 @@
       "type": "总谱",
       "section": "ALL",
       "version": "v3",
-      "visibility": "全团可见"
+      "visibility": "全团可见",
+      "storageKey": "works/moon/score-v3.pdf",
+      "isPublic": false
     },
     {
       "id": "r-02",
@@ -258,7 +260,9 @@
       "type": "分声部示范",
       "section": "A",
       "version": "mp3",
-      "visibility": "本声部"
+      "visibility": "本声部",
+      "storageKey": "works/moon/alto-demo.mp3",
+      "isPublic": false
     },
     {
       "id": "r-03",
@@ -267,7 +271,9 @@
       "type": "伴奏",
       "section": "ALL",
       "version": "m4a",
-      "visibility": "全团可见"
+      "visibility": "全团可见",
+      "storageKey": "works/moon/piano-accompaniment.m4a",
+      "isPublic": false
     },
     {
       "id": "r-04",
@@ -276,7 +282,9 @@
       "type": "排练录音",
       "section": "ALL",
       "version": "m4a",
-      "visibility": "全团可见"
+      "visibility": "全团可见",
+      "storageKey": "works/spring/rehearsal-20260509.m4a",
+      "isPublic": false
     }
   ],
   "practiceTasks": [
