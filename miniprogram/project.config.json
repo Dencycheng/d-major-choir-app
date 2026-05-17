@@ -1,0 +1,18 @@
+{
+  "appid": "wx_CHANGE_ME",
+  "projectname": "d-major-choir-miniprogram",
+  "description": "D大调合唱团成员端小程序 MVP",
+  "miniprogramRoot": "./",
+  "compileType": "miniprogram",
+  "setting": {
+    "urlCheck": true,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "coverView": true,
+    "ignoreUploadUnusedFiles": true
+  },
+  "libVersion": "3.7.0",
+  "condition": {}
+}

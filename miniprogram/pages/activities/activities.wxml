@@ -1,0 +1,41 @@
+<view class="page">
+  <view class="section-head">
+    <view>
+      <view class="section-title">排练活动</view>
+      <view class="muted">反馈参加/请假，排练现场点击签到</view>
+    </view>
+    <button class="btn" size="mini" bindtap="load">刷新</button>
+  </view>
+
+  <view wx:for="{{events}}" wx:key="id" class="card">
+    <view class="row wrap">
+      <view>
+        <view class="card-title">{{item.title}}</view>
+        <view class="card-subtitle">{{item.type}} · {{item.time}}</view>
+        <view class="card-subtitle">{{item.location}}</view>
+      </view>
+      <view class="pill {{item.myAttendance.status === '已签到' ? 'green' : 'gold'}}">{{item.myAttendance.status || '待反馈'}}</view>
+    </view>
+
+    <view wx:if="{{item.agenda}}" class="agenda">{{item.agenda}}</view>
+
+    <view class="stats row wrap">
+      <view class="pill">参加 {{item.stats.joined}}</view>
+      <view class="pill">请假 {{item.stats.leave}}</view>
+      <view class="pill green">签到 {{item.stats.checkedIn}}</view>
+    </view>
+
+    <view class="field">
+      <view class="label">备注 / 请假原因</view>
+      <input data-id="{{item.id}}" value="{{noteMap[item.id]}}" placeholder="可不填" bindinput="onNoteInput" />
+    </view>
+
+    <view class="btn-row">
+      <button class="btn" data-id="{{item.id}}" data-response="参加" bindtap="respond">反馈参加</button>
+      <button class="btn" data-id="{{item.id}}" data-response="请假" bindtap="respond">提交请假</button>
+      <button class="btn primary" data-id="{{item.id}}" bindtap="checkin">签到</button>
+    </view>
+  </view>
+
+  <view wx:if="{{!events.length}}" class="empty">暂无活动</view>
+</view>

@@ -1,0 +1,23 @@
+.brief {
+  margin-top: 16rpx;
+  color: #4a453f;
+  line-height: 1.6;
+}
+
+.record-panel {
+  padding: 18rpx;
+  border-radius: 16rpx;
+  background: #f6f1e8;
+}
+
+.my-record {
+  padding: 16rpx 0;
+}
+
+.feedback {
+  margin-top: 10rpx;
+  padding: 14rpx;
+  border-left: 6rpx solid #c69f62;
+  border-radius: 10rpx;
+  background: #fff8ea;
+}
