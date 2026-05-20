@@ -3,27 +3,27 @@
 当前版本：
 
 ```text
-1.1.0
+1.1.1
 ```
 
 ## 已更新文件
 
-- `package.json`：`version = 1.1.0`
-- `miniprogram/config/index.js`：`VERSION = 1.1.0`
-- `miniprogram/project.config.json`：描述更新为 `v1.1.0`
-- `RELEASE_NOTES.md`：新增 v1.1.0 变更说明
+- `package.json`：`version = 1.1.1`
+- `miniprogram/config/index.js`：`VERSION = 1.1.1`
+- `miniprogram/project.config.json`：描述更新为 `v1.1.1`
+- `RELEASE_NOTES.md`：新增 v1.1.1 变更说明
 
 ## 一键发布脚本
 
 ```bash
 chmod +x scripts/release.sh
-GITHUB_REMOTE_URL="git@github.com:<owner>/<repo>.git" ./scripts/release.sh 1.1.0
+GITHUB_REMOTE_URL="git@github.com:<owner>/<repo>.git" ./scripts/release.sh 1.1.1
 ```
 
 如果已经配置过 Git remote，可直接：
 
 ```bash
-./scripts/release.sh 1.1.0
+./scripts/release.sh 1.1.1
 ```
 
 ## 微信开发者工具要求
@@ -37,7 +37,7 @@ GITHUB_REMOTE_URL="git@github.com:<owner>/<repo>.git" ./scripts/release.sh 1.1.0
 如路径不同：
 
 ```bash
-WECHAT_DEVTOOLS_CLI="/path/to/cli" ./scripts/release.sh 1.1.0
+WECHAT_DEVTOOLS_CLI="/path/to/cli" ./scripts/release.sh 1.1.1
 ```
 
 ## 上传前必须确认

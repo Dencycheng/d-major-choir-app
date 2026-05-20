@@ -15,12 +15,13 @@ function absoluteUrl(path) {
 }
 
 function request(options) {
-  const { url, method = "GET", data = {}, header = {} } = options;
+  const { url, method = "GET", data = {}, header = {}, retry = true } = options;
   return new Promise((resolve, reject) => {
     wx.request({
       url: absoluteUrl(url),
       method,
       data,
+      timeout: 15000,
       header: {
         "Content-Type": "application/json",
         "X-Member-Id": getMemberId(),
@@ -34,7 +35,16 @@ function request(options) {
         reject(new Error((res.data && res.data.error) || `请求失败：${res.statusCode}`));
       },
       fail(error) {
-        reject(new Error(error.errMsg || "网络请求失败"));
+        const message = error.errMsg || "网络请求失败";
+        if (retry && /ERR_CONNECTION_RESET|timeout|fail/i.test(message)) {
+          request({ url, method, data, header, retry: false }).then(resolve).catch(reject);
+          return;
+        }
+        if (message.indexOf("ERR_CONNECTION_RESET") >= 0) {
+          reject(new Error("服务器连接被重置，请确认后端已更新并重启后再试"));
+          return;
+        }
+        reject(new Error(message));
       }
     });
   });

@@ -94,11 +94,14 @@ Page({
   },
 
   async saveProfile() {
+    wx.showLoading({ title: "保存中" });
     try {
       await api.post("/api/profile", this.data.profileForm);
+      wx.hideLoading();
       wx.showToast({ title: "资料已保存", icon: "success" });
       this.load();
     } catch (error) {
+      wx.hideLoading();
       wx.showToast({ title: error.message, icon: "none" });
     }
   },

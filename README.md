@@ -104,7 +104,7 @@ scripts/                  migration/seed/smoke 执行脚本
 
 ## 发布
 
-当前版本：`1.1.0`。发布脚本和运行说明见 [docs/release-runbook.md](/Users/dc/Documents/Codex/2026-05-14/files-mentioned-by-the-user-d/docs/release-runbook.md)。
+当前版本：`1.1.1`。发布脚本和运行说明见 [docs/release-runbook.md](/Users/dc/Documents/Codex/2026-05-14/files-mentioned-by-the-user-d/docs/release-runbook.md)。
 
 ## 测试账号
 

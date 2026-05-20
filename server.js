@@ -367,6 +367,14 @@ async function routeApi(req, res, url) {
     return json(res, 200, bootstrap(req, db));
   }
 
+  if (req.method === "GET" && pathname === "/api/profile") {
+    const member = memberWithAvatar(db, getCurrentMember(req, db));
+    return json(res, 200, {
+      member,
+      pendingRequests: db.profileChangeRequests.filter(request => request.memberId === member.id)
+    });
+  }
+
   if (req.method === "GET" && pathname === "/api/dashboard") {
     return json(res, 200, calcDashboard(db));
   }
@@ -443,7 +451,7 @@ async function routeApi(req, res, url) {
     return json(res, 200, { role, bootstrap: bootstrap(req, db) });
   }
 
-  if (req.method === "POST" && pathname === "/api/profile") {
+  if ((req.method === "POST" || req.method === "PUT") && pathname === "/api/profile") {
     const body = await parseJson(req);
     const member = getCurrentMember(req, db);
     if (!member) return json(res, 404, { error: "成员不存在" });
