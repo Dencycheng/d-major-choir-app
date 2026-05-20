@@ -1,0 +1,78 @@
+<view class="page">
+  <view class="section-head">
+    <view>
+      <view class="section-title">练习任务</view>
+      <view class="muted">录音、填写自评并上传到后台</view>
+    </view>
+    <button class="btn" size="mini" bindtap="load">刷新</button>
+  </view>
+
+  <view wx:for="{{tasks}}" wx:key="id" class="card">
+    <view class="row wrap">
+      <view>
+        <view class="card-title">{{item.title}}</view>
+        <view class="card-subtitle">{{item.workTitle}} · {{item.segment}}</view>
+        <view class="card-subtitle">截止 {{item.deadline}}</view>
+      </view>
+      <view class="pill {{item.progress.done ? 'green' : 'gold'}}">{{item.progress.submitted}}/{{item.progress.required}}</view>
+    </view>
+    <view wx:if="{{item.brief}}" class="brief">{{item.brief}}</view>
+
+    <view class="divider"></view>
+
+    <view class="record-panel">
+      <view class="row wrap">
+        <view class="muted">录音文件：{{recordingMap[item.id].label || '未选择'}}</view>
+        <view class="pill blue" wx:if="{{activeRecordingTaskId === item.id}}">录音中</view>
+      </view>
+      <view class="btn-row">
+        <button class="btn dark" data-id="{{item.id}}" bindtap="startRecord">开始录音</button>
+        <button class="btn" data-id="{{item.id}}" bindtap="stopRecord">停止</button>
+        <button class="btn" data-id="{{item.id}}" bindtap="chooseAudio">选择文件</button>
+      </view>
+
+      <view class="field">
+        <view class="label">练习感受</view>
+        <textarea data-id="{{item.id}}" data-field="feelings" value="{{formMap[item.id].feelings}}" placeholder="今天练习里觉得哪里顺、哪里卡" bindinput="onFormInput"></textarea>
+      </view>
+
+      <view class="field">
+        <view class="label">音准自评</view>
+        <picker data-id="{{item.id}}" data-field="pitch" value="{{formMap[item.id].pitchIndex || 1}}" range="{{ratings}}" bindchange="onRatingChange">
+          <view>{{formMap[item.id].pitch || '一般'}}</view>
+        </picker>
+      </view>
+
+      <view class="field">
+        <view class="label">节奏自评</view>
+        <picker data-id="{{item.id}}" data-field="rhythm" value="{{formMap[item.id].rhythmIndex || 1}}" range="{{ratings}}" bindchange="onRatingChange">
+          <view>{{formMap[item.id].rhythm || '一般'}}</view>
+        </picker>
+      </view>
+
+      <view class="field">
+        <view class="label">气息自评</view>
+        <picker data-id="{{item.id}}" data-field="breath" value="{{formMap[item.id].breathIndex || 1}}" range="{{ratings}}" bindchange="onRatingChange">
+          <view>{{formMap[item.id].breath || '一般'}}</view>
+        </picker>
+      </view>
+
+      <view class="btn-row">
+        <button class="btn" data-id="{{item.id}}" bindtap="toggleNeedHelp">{{formMap[item.id].needHelp ? '已标记需要帮助' : '需要声部长帮助'}}</button>
+        <button class="btn primary" data-id="{{item.id}}" bindtap="submitRecord">提交打卡</button>
+      </view>
+    </view>
+
+    <view wx:if="{{item.myRecords.length}}" class="divider"></view>
+    <view wx:for="{{item.myRecords}}" wx:key="id" wx:for-item="record" class="my-record">
+      <view class="row">
+        <view>
+          <view class="muted">{{record.submittedAtText}} · {{record.status}}</view>
+          <view wx:if="{{record.feedback}}" class="feedback">点评：{{record.feedback}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{!tasks.length}}" class="empty">暂无分配给你的练习任务</view>
+</view>

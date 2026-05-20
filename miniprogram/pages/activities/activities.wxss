@@ -1,0 +1,10 @@
+.agenda {
+  margin-top: 18rpx;
+  color: #4a453f;
+  line-height: 1.6;
+}
+
+.stats {
+  justify-content: flex-start;
+  margin-top: 18rpx;
+}

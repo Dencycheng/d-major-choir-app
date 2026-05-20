@@ -1,0 +1,22 @@
+{
+  "name": "d-major-choir-hub",
+  "version": "1.1.0",
+  "description": "D大调合唱团数字团务与练习系统 MVP",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "migrate": "node scripts/db-migrate.js",
+    "seed": "node scripts/migrate-db-json.js",
+    "smoke": "node scripts/smoke-test.js",
+    "db:migrate": "node scripts/db-migrate.js",
+    "db:migrate-json": "node scripts/migrate-db-json.js",
+    "db:backup": "node scripts/db-backup.js"
+  },
+  "keywords": [
+    "choir",
+    "practice",
+    "dashboard"
+  ],
+  "author": "",
+  "license": "UNLICENSED"
+}

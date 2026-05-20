@@ -1,0 +1,46 @@
+<view class="page">
+  <view class="section-head">
+    <view>
+      <view class="section-title">谱库</view>
+      <view class="muted">查看总谱、分声部资料，播放伴奏和示范音频</view>
+    </view>
+    <button class="btn" size="mini" bindtap="load">刷新</button>
+  </view>
+
+  <view wx:for="{{works}}" wx:key="id" wx:for-item="work" class="card">
+    <view class="card-title">{{work.title}}</view>
+    <view class="card-subtitle">{{work.composer}} · {{work.status}}</view>
+    <view wx:if="{{work.weakSpot}}" class="muted weak">提示：{{work.weakSpot}}</view>
+
+    <view wx:if="{{work.resources.length}}" class="resource-list">
+      <view wx:for="{{work.resources}}" wx:key="id" wx:for-item="resource" class="resource">
+        <view class="row wrap">
+          <view>
+            <view class="resource-title">{{resource.title}}</view>
+            <view class="card-subtitle">{{resource.type}} · {{resource.displaySection}} · {{resource.version}}</view>
+          </view>
+          <view class="pill">{{resource.canPreview ? '可用' : '未上传'}}</view>
+        </view>
+        <view class="btn-row">
+          <block wx:if="{{resource.isVideo}}">
+            <video id="video-{{resource.id}}" src="{{resource.fileUrl}}" controls class="video"></video>
+            <view class="btn-row">
+              <button class="btn" data-id="{{resource.id}}" data-rate="0.75" bindtap="setVideoRate">0.75x</button>
+              <button class="btn" data-id="{{resource.id}}" data-rate="1" bindtap="setVideoRate">1x</button>
+              <button class="btn" data-id="{{resource.id}}" data-rate="1.25" bindtap="setVideoRate">1.25x</button>
+              <button class="btn" data-id="{{resource.id}}" data-rate="1.5" bindtap="setVideoRate">1.5x</button>
+            </view>
+          </block>
+          <button wx:elif="{{resource.isAudio}}" class="btn primary" data-id="{{resource.id}}" data-url="{{resource.fileUrl}}" bindtap="playAudio">
+            {{playingResourceId === resource.id ? '暂停播放' : '播放音频'}}
+          </button>
+          <button wx:elif="{{resource.canPreview}}" class="btn primary" data-url="{{resource.fileUrl}}" data-title="{{resource.title}}" data-type="{{resource.type}}" bindtap="openDocument">打开资料</button>
+          <button wx:else class="btn" disabled>暂无文件</button>
+        </view>
+      </view>
+    </view>
+    <view wx:else class="empty small-empty">暂无你可查看的资料</view>
+  </view>
+
+  <view wx:if="{{!works.length}}" class="empty">暂无作品</view>
+</view>

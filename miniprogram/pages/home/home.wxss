@@ -1,0 +1,7 @@
+.feedback {
+  margin-top: 16rpx;
+  padding: 18rpx;
+  border-left: 6rpx solid #c69f62;
+  border-radius: 12rpx;
+  background: #fff8ea;
+}
