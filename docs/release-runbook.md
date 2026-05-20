@@ -3,27 +3,27 @@
 当前版本：
 
 ```text
-1.1.1
+1.1.3
 ```
 
 ## 已更新文件
 
-- `package.json`：`version = 1.1.1`
-- `miniprogram/config/index.js`：`VERSION = 1.1.1`
-- `miniprogram/project.config.json`：描述更新为 `v1.1.1`
-- `RELEASE_NOTES.md`：新增 v1.1.1 变更说明
+- `package.json`：`version = 1.1.3`
+- `miniprogram/config/index.js`：`VERSION = 1.1.3`
+- `miniprogram/project.config.json`：描述更新为 `v1.1.3`
+- `RELEASE_NOTES.md`：新增 v1.1.3 变更说明
 
 ## 一键发布脚本
 
 ```bash
 chmod +x scripts/release.sh
-GITHUB_REMOTE_URL="git@github.com:<owner>/<repo>.git" ./scripts/release.sh 1.1.1
+GITHUB_REMOTE_URL="git@github.com:<owner>/<repo>.git" ./scripts/release.sh 1.1.3
 ```
 
 如果已经配置过 Git remote，可直接：
 
 ```bash
-./scripts/release.sh 1.1.1
+./scripts/release.sh 1.1.3
 ```
 
 ## 微信开发者工具要求
@@ -37,7 +37,7 @@ GITHUB_REMOTE_URL="git@github.com:<owner>/<repo>.git" ./scripts/release.sh 1.1.1
 如路径不同：
 
 ```bash
-WECHAT_DEVTOOLS_CLI="/path/to/cli" ./scripts/release.sh 1.1.1
+WECHAT_DEVTOOLS_CLI="/path/to/cli" ./scripts/release.sh 1.1.3
 ```
 
 ## 上传前必须确认
@@ -48,9 +48,8 @@ WECHAT_DEVTOOLS_CLI="/path/to/cli" ./scripts/release.sh 1.1.1
 4. 小程序后台已配置合法域名：
 
 ```text
-request: https://api.dmajorchoir.com
-uploadFile: https://api.dmajorchoir.com
-downloadFile: https://api.dmajorchoir.com
+当前临时调试地址: http://119.45.176.130:4173
+微信正式体验版通常要求 HTTPS 合法域名；备案完成后再统一切换。
 ```
 
 ## 本次环境限制记录

@@ -111,7 +111,7 @@ http://127.0.0.1:4173
 
 1. 微信开发者工具打开 `miniprogram/`。
 2. 本地调试时把 `miniprogram/config/index.js` 的 `ENV` 改为 `development`。
-3. 生产体验版保持 `production`，API 为 `https://api.dmajorchoir.com`。
+3. 临时试用版保持 `production`，API 使用 `http://119.45.176.130:4173`。
 
 ## 服务器部署步骤
 
@@ -122,14 +122,14 @@ npm run db:backup
 npm run db:migrate
 npm run db:migrate-json
 mkdir -p uploads/resources uploads/recordings uploads/avatars
-NODE_ENV=production HOST=127.0.0.1 PORT=4173 npm start
+NODE_ENV=production HOST=0.0.0.0 PORT=4173 npm start
 ```
 
 Nginx/腾讯云反代：
 
-- `https://api.dmajorchoir.com` 转发到 `127.0.0.1:4173`。
-- `https://admin.dmajorchoir.com` 部署 `public/` 静态文件，并确保 `public/config.js` 指向生产 API。
-- 小程序后台配置 `request`、`uploadFile`、`downloadFile` 合法域名为 `https://api.dmajorchoir.com`。
+- 当前临时环境直接使用 `http://119.45.176.130:4173`，管理后台与 API 暂共用同一个入口。
+- 确保 `public/config.js` 指向 `http://119.45.176.130:4173`。
+- 小程序当前也指向 `http://119.45.176.130:4173`。微信正式体验版通常要求 HTTPS 合法域名，备案完成后再统一切换。
 
 ## 测试账号
 

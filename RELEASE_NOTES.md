@@ -1,5 +1,16 @@
 # Release Notes
 
+## v1.1.3 - 2026-05-20
+
+- Migrated the temporary trial endpoint to the new Tencent Cloud server `http://119.45.176.130:4173`.
+- Updated Web, Mini Program, backend CORS defaults, environment examples, and deployment docs for the new server.
+- Kept the project on temporary IP access while ICP filing is still pending.
+
+## v1.1.2 - 2026-05-20
+
+- Switched temporary trial API base URL before ICP filing is complete.
+- Updated Web and Mini Program configuration for the temporary Tencent Cloud IP endpoint.
+
 ## v1.1.1 - 2026-05-20
 
 - Added `GET` and `PUT` compatibility for `/api/profile`.

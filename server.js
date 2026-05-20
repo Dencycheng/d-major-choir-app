@@ -5,9 +5,9 @@ const crypto = require("crypto");
 const { applyMigrations, applyBaseSeed, readStore, writeStore } = require("./lib/sqlite-store");
 
 const PORT = process.env.PORT || 4173;
-const HOST = process.env.HOST || "127.0.0.1";
 const NODE_ENV = process.env.NODE_ENV || "development";
-const ADMIN_ORIGIN = process.env.ADMIN_ORIGIN || "https://admin.dmajorchoir.com";
+const HOST = process.env.HOST || (NODE_ENV === "production" ? "0.0.0.0" : "127.0.0.1");
+const ADMIN_ORIGIN = process.env.ADMIN_ORIGIN || "http://119.45.176.130:4173";
 const FILE_SIGNING_SECRET = process.env.FILE_SIGNING_SECRET || "local-dev-file-signing-secret";
 const OBJECT_STORAGE_PRIVATE_BASE_URL = process.env.OBJECT_STORAGE_PRIVATE_BASE_URL || "https://private-storage.example.com/dmajor";
 

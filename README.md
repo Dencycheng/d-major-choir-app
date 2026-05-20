@@ -66,12 +66,14 @@ npm start
 | `POST` | `/api/events/respond` | 成员反馈参加/请假 |
 | `POST` | `/api/events/checkin` | 成员签到 |
 
-## 生产目标域名
+## 当前试用地址
 
-- API：`https://api.dmajorchoir.com`
-- Web 管理后台：`https://admin.dmajorchoir.com`
+- API：`http://119.45.176.130:4173`
+- Web 管理后台：`http://119.45.176.130:4173`
 
-正式部署前，需要按 [docs/deployment.md](/Users/dc/Documents/Codex/2026-05-14/files-mentioned-by-the-user-d/docs/deployment.md) 配置 DNS、TLS、数据库、对象存储和微信小程序后台。
+当前域名尚未完成 ICP 备案，试用阶段统一使用腾讯云 IP 地址。备案完成后，再按 [docs/deployment.md](/Users/dc/Documents/Codex/2026-05-14/files-mentioned-by-the-user-d/docs/deployment.md) 统一切换为正式域名、TLS、对象存储和微信小程序合法域名。
+
+`dmajorchoir.com` 仍在备案申请中，预计 1-2 周完成；备案完成前不要把小程序或后台配置切回域名。
 
 ## 重要安全原则
 
@@ -104,7 +106,7 @@ scripts/                  migration/seed/smoke 执行脚本
 
 ## 发布
 
-当前版本：`1.1.1`。发布脚本和运行说明见 [docs/release-runbook.md](/Users/dc/Documents/Codex/2026-05-14/files-mentioned-by-the-user-d/docs/release-runbook.md)。
+当前版本：`1.1.3`。发布脚本和运行说明见 [docs/release-runbook.md](/Users/dc/Documents/Codex/2026-05-14/files-mentioned-by-the-user-d/docs/release-runbook.md)。
 
 ## 测试账号
 

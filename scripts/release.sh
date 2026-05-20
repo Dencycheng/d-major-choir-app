@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="${1:-1.1.1}"
+VERSION="${1:-1.1.3}"
 REMOTE_URL="${GITHUB_REMOTE_URL:-}"
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 MINIPROGRAM_ROOT="$PROJECT_ROOT/miniprogram"

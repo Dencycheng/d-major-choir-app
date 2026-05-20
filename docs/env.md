@@ -3,10 +3,10 @@
 | 变量 | 示例 | 说明 |
 | --- | --- | --- |
 | `NODE_ENV` | `production` | 运行环境。 |
-| `HOST` | `127.0.0.1` | API 服务监听地址，建议由反向代理转发。 |
+| `HOST` | `0.0.0.0` | 当前临时试用直接开放 `4173` 端口；正式反代后可改回 `127.0.0.1`。 |
 | `PORT` | `4173` | API 服务端口。 |
-| `API_ORIGIN` | `https://api.dmajorchoir.com` | API 公网域名。 |
-| `ADMIN_ORIGIN` | `https://admin.dmajorchoir.com` | 管理后台公网域名，用于 CORS 白名单。 |
+| `API_ORIGIN` | `http://119.45.176.130:4173` | 当前腾讯云临时 API 地址。 |
+| `ADMIN_ORIGIN` | `http://119.45.176.130:4173` | 当前腾讯云临时管理后台地址，用于 CORS 白名单。 |
 | `DATABASE_URL` | `postgres://...` | 生产 PostgreSQL 连接串。 |
 | `DATABASE_SSL` | `true` | 云数据库通常需要开启。 |
 | `JWT_SECRET` | `...` | 登录令牌签名密钥，至少 32 位。 |

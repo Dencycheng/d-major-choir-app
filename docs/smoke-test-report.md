@@ -2,8 +2,8 @@
 
 测试环境：
 
-- API：`https://api.dmajorchoir.com`
-- 管理后台：`https://admin.dmajorchoir.com`
+- API：`http://119.45.176.130:4173`
+- 管理后台：`http://119.45.176.130:4173`
 - 小程序版本：`0.1.0-trial`
 - 测试时间：
 - 测试人：
