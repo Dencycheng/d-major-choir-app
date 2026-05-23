@@ -10,7 +10,8 @@
     "smoke": "node scripts/smoke-test.js",
     "db:migrate": "node scripts/db-migrate.js",
     "db:migrate-json": "node scripts/migrate-db-json.js",
-    "db:backup": "node scripts/db-backup.js"
+    "db:backup": "node scripts/db-backup.js",
+    "db:restore": "node scripts/db-restore.js"
   },
   "keywords": [
     "choir",
