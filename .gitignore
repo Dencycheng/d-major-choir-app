@@ -10,5 +10,7 @@ backups/
 tmp/
 uploads/*
 !uploads/.gitkeep
+data/*.db
+*.sqlite
 data/*.sqlite
 data/*.sqlite-*
