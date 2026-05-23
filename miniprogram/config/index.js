@@ -1,12 +1,12 @@
-const ENV = "production";
+const ENV = "development";
 const VERSION = "1.1.3";
 
 const CONFIG = {
   production: {
-    API_BASE_URL: "http://119.45.176.130:4173"
+    API_BASE_URL: "https://api.dmajorchoir.com"
   },
   development: {
-    API_BASE_URL: "http://127.0.0.1:4173"
+    API_BASE_URL: "http://119.45.176.130:4173"
   }
 };
 
