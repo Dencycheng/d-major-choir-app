@@ -5,13 +5,14 @@
   "miniprogramRoot": "./",
   "compileType": "miniprogram",
   "setting": {
-    "urlCheck": true,
+    "urlCheck": false,
     "es6": true,
     "enhance": true,
     "postcss": true,
     "minified": true,
     "coverView": true,
-    "ignoreUploadUnusedFiles": true
+    "ignoreUploadUnusedFiles": true,
+    "minifyWXML": true
   },
   "libVersion": "3.7.0",
   "condition": {}
