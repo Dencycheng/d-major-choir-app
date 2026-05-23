@@ -13,7 +13,7 @@ const OBJECT_STORAGE_PRIVATE_BASE_URL = process.env.OBJECT_STORAGE_PRIVATE_BASE_
 
 const root = __dirname;
 const publicDir = path.join(root, "public");
-const uploadsDir = path.join(root, "uploads");
+const uploadsDir = process.env.UPLOAD_DIR || (NODE_ENV === "production" ? "/home/ubuntu/d_major_uploads" : path.join(root, "uploads"));
 
 fs.mkdirSync(uploadsDir, { recursive: true });
 fs.mkdirSync(path.join(uploadsDir, "resources"), { recursive: true });
@@ -22,7 +22,7 @@ fs.mkdirSync(path.join(uploadsDir, "recordings"), { recursive: true });
 applyMigrations();
 applyBaseSeed();
 
-const RESOURCE_TYPES = new Set(["总谱", "分声部谱", "歌词", "伴奏", "分声部音频", "视频谱", "排练视频"]);
+const RESOURCE_TYPES = new Set(["总谱", "分声部谱", "歌词", "伴奏", "分声部音频", "视频谱", "排练视频", "图片谱", "电子谱", "其他资料"]);
 const SECTION_CODES = new Set(["S", "A", "T", "B", "ALL"]);
 const CURRENT_MEMBER_ID = "m-alto-01";
 
@@ -163,8 +163,8 @@ function sanitizeFilename(name) {
 function saveUpload(file, folder) {
   if (!file || !file.buffer?.length) return null;
   const safeName = sanitizeFilename(file.originalName);
-  const relativePath = path.join("uploads", folder, safeName);
-  const absolutePath = path.join(root, relativePath);
+  const absolutePath = path.join(uploadsDir, folder, safeName);
+  const relativePath = absolutePath.startsWith(root) ? path.relative(root, absolutePath) : absolutePath;
   fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
   fs.writeFileSync(absolutePath, file.buffer);
   return {
@@ -867,7 +867,7 @@ async function routeApi(req, res, url) {
     const fileId = pathname.split("/").pop();
     const asset = db.fileAssets.find(file => file.id === fileId);
     if (!asset) return json(res, 404, { error: "文件不存在" });
-    const absolutePath = path.join(root, asset.path);
+    const absolutePath = path.isAbsolute(asset.path) ? asset.path : path.join(root, asset.path);
     if (!absolutePath.startsWith(uploadsDir) || !fs.existsSync(absolutePath)) {
       return json(res, 404, { error: "文件不存在或已迁移" });
     }
