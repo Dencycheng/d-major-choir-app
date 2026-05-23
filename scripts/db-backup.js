@@ -8,9 +8,17 @@ if (!fs.existsSync(source)) {
   process.exit(1);
 }
 
-const backupDir = path.join(__dirname, "..", "backups");
+const backupDir = process.env.BACKUP_DIR || (process.env.NODE_ENV === "production" ? "/home/ubuntu/d_major_backups" : path.join(__dirname, "..", "backups"));
 fs.mkdirSync(backupDir, { recursive: true });
 const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\..+/, "");
 const target = path.join(backupDir, `dmajor-${stamp}.sqlite`);
 fs.copyFileSync(source, target);
-console.log(`Backup created: ${target}`);
+
+const uploadDir = process.env.UPLOAD_DIR || (process.env.NODE_ENV === "production" ? "/home/ubuntu/d_major_uploads" : path.join(__dirname, "..", "uploads"));
+if (fs.existsSync(uploadDir)) {
+  const uploadTarget = path.join(backupDir, `uploads-${stamp}`);
+  fs.cpSync(uploadDir, uploadTarget, { recursive: true });
+  console.log(`Uploads backup created: ${uploadTarget}`);
+}
+
+console.log(`SQLite backup created: ${target}`);
