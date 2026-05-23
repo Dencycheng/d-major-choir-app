@@ -110,8 +110,8 @@ http://127.0.0.1:4173
 小程序开发：
 
 1. 微信开发者工具打开 `miniprogram/`。
-2. 本地调试时把 `miniprogram/config/index.js` 的 `ENV` 改为 `development`。
-3. 临时试用版保持 `production`，API 使用 `http://119.45.176.130:4173`。
+2. 备案通过前保持 `miniprogram/config/index.js` 的 `ENV = "development"`。
+3. development API 使用 `http://119.45.176.130:4173`，production API 保留 `https://api.dmajorchoir.com`。
 
 ## 服务器部署步骤
 
