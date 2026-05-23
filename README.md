@@ -104,6 +104,10 @@ scripts/                  migration/seed/smoke 执行脚本
 
 已升级为 SQLite 持久化、团员管理、角色权限、成员资料、请假审批、视频谱倍速播放版本。完整说明见 [docs/mvp-upgrade-2026-05-20.md](/Users/dc/Documents/Codex/2026-05-14/files-mentioned-by-the-user-d/docs/mvp-upgrade-2026-05-20.md)。
 
+## V1 真实试用版交付
+
+本轮补齐生产 SQLite 路径、uploads 生产路径、development 小程序 API、备份/恢复脚本、资料类型和交付验收说明。完整说明见 [docs/V1_DELIVERY.md](docs/V1_DELIVERY.md)。
+
 ## 发布
 
 当前版本：`1.1.3`。发布脚本和运行说明见 [docs/release-runbook.md](/Users/dc/Documents/Codex/2026-05-14/files-mentioned-by-the-user-d/docs/release-runbook.md)。
