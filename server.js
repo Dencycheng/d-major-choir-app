@@ -1,8 +1,11 @@
 const http = require("http");
+const https = require("https");
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const { applyMigrations, applyBaseSeed, readStore, writeStore } = require("./lib/sqlite-store");
+
+loadEnvFile();
 
 const PORT = process.env.PORT || 4173;
 const NODE_ENV = process.env.NODE_ENV || "development";
@@ -14,6 +17,12 @@ const OBJECT_STORAGE_PRIVATE_BASE_URL = process.env.OBJECT_STORAGE_PRIVATE_BASE_
 const root = __dirname;
 const publicDir = path.join(root, "public");
 const uploadsDir = process.env.UPLOAD_DIR || (NODE_ENV === "production" ? "/home/ubuntu/d_major_uploads" : path.join(root, "uploads"));
+const COS_BUCKET = process.env.COS_BUCKET || "";
+const COS_REGION = process.env.COS_REGION || "";
+const COS_SECRET_ID = process.env.COS_SECRET_ID || "";
+const COS_SECRET_KEY = process.env.COS_SECRET_KEY || "";
+const COS_PUBLIC_BASE = (process.env.COS_PUBLIC_BASE || (COS_BUCKET && COS_REGION ? `https://${COS_BUCKET}.cos.${COS_REGION}.myqcloud.com` : "")).replace(/\/$/, "");
+const COS_ENABLED = Boolean(COS_BUCKET && COS_REGION && COS_SECRET_ID && COS_SECRET_KEY && COS_PUBLIC_BASE);
 
 fs.mkdirSync(uploadsDir, { recursive: true });
 fs.mkdirSync(path.join(uploadsDir, "resources"), { recursive: true });
@@ -25,6 +34,24 @@ applyBaseSeed();
 const RESOURCE_TYPES = new Set(["总谱", "分声部谱", "歌词", "伴奏", "分声部音频", "视频谱", "排练视频", "图片谱", "电子谱", "其他资料"]);
 const SECTION_CODES = new Set(["S", "A", "T", "B", "ALL"]);
 const CURRENT_MEMBER_ID = "m-alto-01";
+
+function loadEnvFile() {
+  const envPath = path.join(__dirname, ".env");
+  if (!fs.existsSync(envPath)) return;
+  const lines = fs.readFileSync(envPath, "utf8").split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const index = trimmed.indexOf("=");
+    if (index === -1) continue;
+    const key = trimmed.slice(0, index).trim();
+    let value = trimmed.slice(index + 1).trim();
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    if (!process.env[key]) process.env[key] = value;
+  }
+}
 
 function now() {
   return new Date().toISOString();
@@ -160,9 +187,100 @@ function sanitizeFilename(name) {
   return `${base || "upload"}-${Date.now()}${ext}`;
 }
 
-function saveUpload(file, folder) {
+function sha1(value) {
+  return crypto.createHash("sha1").update(value).digest("hex");
+}
+
+function hmacSha1(key, value) {
+  return crypto.createHmac("sha1", key).update(value).digest("hex");
+}
+
+function cosObjectPath(key) {
+  return `/${String(key).split("/").map(part => encodeURIComponent(part)).join("/")}`;
+}
+
+function cosSignature(method, key, expiresIn = 3600) {
+  const nowSeconds = Math.floor(Date.now() / 1000);
+  const signTime = `${nowSeconds};${nowSeconds + expiresIn}`;
+  const host = new URL(COS_PUBLIC_BASE).host;
+  const objectPath = cosObjectPath(key);
+  const httpString = [
+    method.toLowerCase(),
+    objectPath,
+    "",
+    `host=${host}\n`,
+    ""
+  ].join("\n");
+  const stringToSign = ["sha1", signTime, sha1(httpString), ""].join("\n");
+  const signKey = hmacSha1(COS_SECRET_KEY, signTime);
+  const signature = hmacSha1(signKey, stringToSign);
+  return {
+    host,
+    objectPath,
+    signTime,
+    authorization: [
+      "q-sign-algorithm=sha1",
+      `q-ak=${COS_SECRET_ID}`,
+      `q-sign-time=${signTime}`,
+      `q-key-time=${signTime}`,
+      "q-header-list=host",
+      "q-url-param-list=",
+      `q-signature=${signature}`
+    ].join("&")
+  };
+}
+
+function cosSignedUrl(key, method = "GET", expiresIn = 3600) {
+  if (!COS_ENABLED) return "";
+  const signature = cosSignature(method, key, expiresIn);
+  return `${COS_PUBLIC_BASE}${signature.objectPath}?${signature.authorization}`;
+}
+
+function uploadToCos(key, file) {
+  const signature = cosSignature("PUT", key, 3600);
+  return new Promise((resolve, reject) => {
+    const req = https.request({
+      method: "PUT",
+      hostname: signature.host,
+      path: signature.objectPath,
+      headers: {
+        Authorization: signature.authorization,
+        Host: signature.host,
+        "Content-Type": file.mimeType || "application/octet-stream",
+        "Content-Length": file.buffer.length
+      }
+    }, res => {
+      const chunks = [];
+      res.on("data", chunk => chunks.push(chunk));
+      res.on("end", () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          resolve();
+          return;
+        }
+        reject(new Error(`COS 上传失败：${res.statusCode} ${Buffer.concat(chunks).toString("utf8").slice(0, 300)}`));
+      });
+    });
+    req.on("error", reject);
+    req.end(file.buffer);
+  });
+}
+
+async function saveUpload(file, folder) {
   if (!file || !file.buffer?.length) return null;
   const safeName = sanitizeFilename(file.originalName);
+  if (COS_ENABLED) {
+    const key = `${folder}/${safeName}`;
+    await uploadToCos(key, file);
+    return {
+      id: makeId("file"),
+      originalName: file.originalName || safeName,
+      mimeType: file.mimeType || "application/octet-stream",
+      size: file.buffer.length,
+      path: key,
+      storageProvider: "cos",
+      createdAt: now()
+    };
+  }
   const absolutePath = path.join(uploadsDir, folder, safeName);
   const relativePath = absolutePath.startsWith(root) ? path.relative(root, absolutePath) : absolutePath;
   fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
@@ -187,7 +305,7 @@ function memberWithAvatar(db, member) {
   const file = db.fileAssets.find(asset => asset.id === member.avatarFileId);
   return {
     ...member,
-    avatarUrl: member.avatarUrl || (file ? `/api/files/${file.id}` : "")
+    avatarUrl: member.avatarUrl || (file ? fileUrlForAsset(file) : "")
   };
 }
 
@@ -200,7 +318,7 @@ function resourceWithFile(db, resource) {
   return {
     ...resource,
     file,
-    fileUrl: file ? `/api/files/${file.id}` : "",
+    fileUrl: file ? fileUrlForAsset(file) : "",
     canPreview: Boolean(file)
   };
 }
@@ -211,8 +329,14 @@ function recordWithFile(db, record) {
     ...record,
     taskTitle: db.practiceTasks.find(task => task.id === record.taskId)?.title || "未知任务",
     file,
-    audioUrl: file ? `/api/files/${file.id}` : ""
+    audioUrl: file ? fileUrlForAsset(file) : ""
   };
+}
+
+function fileUrlForAsset(file) {
+  if (!file) return "";
+  if (file.storageProvider === "cos") return cosSignedUrl(file.path, "GET", 3600);
+  return `/api/files/${file.id}`;
 }
 
 function taskProgress(db, task, member) {
@@ -479,7 +603,7 @@ async function routeApi(req, res, url) {
   if (req.method === "POST" && pathname === "/api/profile/avatar") {
     const { files } = await parseMultipart(req);
     const member = getCurrentMember(req, db);
-    const saved = saveUpload(files.avatar, "avatars");
+    const saved = await saveUpload(files.avatar, "avatars");
     if (!saved) return json(res, 400, { error: "请选择头像文件" });
     db.fileAssets.push(saved);
     member.avatarFileId = saved.id;
@@ -567,7 +691,7 @@ async function routeApi(req, res, url) {
     if (fields.section && !SECTION_CODES.has(fields.section)) return json(res, 400, { error: "声部不合法" });
     const work = db.works.find(item => item.id === fields.workId);
     if (!work) return json(res, 404, { error: "作品不存在" });
-    const saved = saveUpload(files.file, "resources");
+    const saved = await saveUpload(files.file, "resources");
     if (!saved) return json(res, 400, { error: "请选择要上传的文件" });
     db.fileAssets.push(saved);
     const resource = {
@@ -656,7 +780,7 @@ async function routeApi(req, res, url) {
     const task = db.practiceTasks.find(item => item.id === fields.taskId);
     if (!task) return json(res, 404, { error: "任务不存在" });
     const member = getCurrentMember(req, db);
-    const saved = saveUpload(files.audio, "recordings");
+    const saved = await saveUpload(files.audio, "recordings");
     if (!saved) return json(res, 400, { error: "请上传录音文件" });
     db.fileAssets.push(saved);
     const record = {
@@ -843,6 +967,14 @@ async function routeApi(req, res, url) {
       if (!resource) return json(res, 404, { error: "资料不存在" });
       const localFile = db.fileAssets.find(file => file.id === resource.fileId);
       if (localFile) {
+        if (localFile.storageProvider === "cos") {
+          return json(res, 200, {
+            resourceId,
+            expiresAt: Math.floor(Date.now() / 1000) + 3600,
+            url: cosSignedUrl(localFile.path, "GET", 3600),
+            provider: "cos"
+          });
+        }
         return json(res, 200, {
           resourceId,
           expiresAt: Math.floor(Date.now() / 1000) + 600,
@@ -867,14 +999,50 @@ async function routeApi(req, res, url) {
     const fileId = pathname.split("/").pop();
     const asset = db.fileAssets.find(file => file.id === fileId);
     if (!asset) return json(res, 404, { error: "文件不存在" });
+    if (asset.storageProvider === "cos") {
+      res.writeHead(302, {
+        Location: cosSignedUrl(asset.path, "GET", 3600),
+        "Cache-Control": "no-store"
+      });
+      res.end();
+      return;
+    }
     const absolutePath = path.isAbsolute(asset.path) ? asset.path : path.join(root, asset.path);
     if (!absolutePath.startsWith(uploadsDir) || !fs.existsSync(absolutePath)) {
       return json(res, 404, { error: "文件不存在或已迁移" });
     }
-    res.writeHead(200, {
+    const stat = fs.statSync(absolutePath);
+    const range = req.headers.range;
+    const commonHeaders = {
       "Content-Type": asset.mimeType || "application/octet-stream",
       "Content-Disposition": `inline; filename*=UTF-8''${encodeURIComponent(asset.originalName)}`,
-      "Cache-Control": "private, max-age=60"
+      "Cache-Control": "private, max-age=60",
+      "Accept-Ranges": "bytes"
+    };
+    if (range) {
+      const match = String(range).match(/bytes=(\d*)-(\d*)/);
+      if (!match) return json(res, 416, { error: "Range 请求不合法" });
+      const start = match[1] ? Number(match[1]) : 0;
+      const end = match[2] ? Number(match[2]) : stat.size - 1;
+      if (Number.isNaN(start) || Number.isNaN(end) || start > end || start >= stat.size) {
+        res.writeHead(416, {
+          ...commonHeaders,
+          "Content-Range": `bytes */${stat.size}`
+        });
+        res.end();
+        return;
+      }
+      res.writeHead(206, {
+        ...commonHeaders,
+        "Content-Length": end - start + 1,
+        "Content-Range": `bytes ${start}-${end}/${stat.size}`
+      });
+      fs.createReadStream(absolutePath, { start, end }).pipe(res);
+      return;
+    }
+    res.writeHead(200, {
+      ...commonHeaders,
+      "Content-Length": stat.size
     });
     fs.createReadStream(absolutePath).pipe(res);
     return;
