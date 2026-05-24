@@ -1,8 +1,7 @@
 #!/usr/bin/env node
-const https = require("https");
 const fs = require("fs");
 const path = require("path");
-const crypto = require("crypto");
+const COS = require("cos-nodejs-sdk-v5");
 const { readStore, writeStore } = require("../lib/sqlite-store");
 
 loadEnvFile();
@@ -21,6 +20,8 @@ if (!COS_BUCKET || !COS_REGION || !COS_SECRET_ID || !COS_SECRET_KEY || !COS_PUBL
   process.exit(1);
 }
 
+const cosClient = new COS({ SecretId: COS_SECRET_ID, SecretKey: COS_SECRET_KEY });
+
 function loadEnvFile() {
   const envPath = path.join(__dirname, "..", ".env");
   if (!fs.existsSync(envPath)) return;
@@ -36,75 +37,22 @@ function loadEnvFile() {
   }
 }
 
-function sha1(value) {
-  return crypto.createHash("sha1").update(value).digest("hex");
-}
-
-function hmacSha1(key, value) {
-  return crypto.createHmac("sha1", key).update(value).digest("hex");
-}
-
-function cosObjectPath(key) {
-  return `/${String(key).split("/").map(part => encodeURIComponent(part)).join("/")}`;
-}
-
-function cosSignature(method, key, expiresIn = 3600) {
-  const nowSeconds = Math.floor(Date.now() / 1000);
-  const signTime = `${nowSeconds};${nowSeconds + expiresIn}`;
-  const host = new URL(COS_PUBLIC_BASE).host;
-  const objectPath = cosObjectPath(key);
-  const httpString = [
-    method.toLowerCase(),
-    objectPath,
-    "",
-    `host=${host}\n`,
-    ""
-  ].join("\n");
-  const stringToSign = ["sha1", signTime, sha1(httpString), ""].join("\n");
-  const signKey = hmacSha1(COS_SECRET_KEY, signTime);
-  const signature = hmacSha1(signKey, stringToSign);
-  return {
-    host,
-    objectPath,
-    authorization: [
-      "q-sign-algorithm=sha1",
-      `q-ak=${COS_SECRET_ID}`,
-      `q-sign-time=${signTime}`,
-      `q-key-time=${signTime}`,
-      "q-header-list=host",
-      "q-url-param-list=",
-      `q-signature=${signature}`
-    ].join("&")
-  };
-}
-
 function uploadToCos(key, filePath, mimeType) {
-  const signature = cosSignature("PUT", key, 3600);
-  const stat = fs.statSync(filePath);
   return new Promise((resolve, reject) => {
-    const req = https.request({
-      method: "PUT",
-      hostname: signature.host,
-      path: signature.objectPath,
-      headers: {
-        Authorization: signature.authorization,
-        Host: signature.host,
-        "Content-Type": mimeType || "application/octet-stream",
-        "Content-Length": stat.size
+    cosClient.putObject({
+      Bucket: COS_BUCKET,
+      Region: COS_REGION,
+      Key: key,
+      Body: fs.createReadStream(filePath),
+      ContentLength: fs.statSync(filePath).size,
+      ContentType: mimeType || "application/octet-stream"
+    }, error => {
+      if (error) {
+        reject(new Error(`COS upload failed ${error.code || error.statusCode || ""}: ${error.message || error}`));
+        return;
       }
-    }, res => {
-      const chunks = [];
-      res.on("data", chunk => chunks.push(chunk));
-      res.on("end", () => {
-        if (res.statusCode >= 200 && res.statusCode < 300) {
-          resolve();
-          return;
-        }
-        reject(new Error(`COS upload failed ${res.statusCode}: ${Buffer.concat(chunks).toString("utf8").slice(0, 300)}`));
-      });
+      resolve();
     });
-    req.on("error", reject);
-    fs.createReadStream(filePath).pipe(req);
   });
 }
 
