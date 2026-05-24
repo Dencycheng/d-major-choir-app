@@ -19,5 +19,8 @@
     "dashboard"
   ],
   "author": "",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "dependencies": {
+    "cos-nodejs-sdk-v5": "^2.15.4"
+  }
 }
