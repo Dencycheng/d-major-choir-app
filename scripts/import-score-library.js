@@ -36,7 +36,7 @@ function titleFromName(filename, parentName) {
     .replace(/\s*-\s*D大调.*$/i, "")
     .replace(/\s+v\d.*$/i, "")
     .replace(/伴奏.*$/i, "")
-    .replace(/-[SATB]\d?\.? .*$/i, ""));
+    .replace(/-[SATB]\d?\]?.*$/i, ""));
 }
 
 function versionFrom(filename) {
