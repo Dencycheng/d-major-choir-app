@@ -5,13 +5,15 @@
 小程序环境配置：
 
 ```js
-export const API_BASE_URL = "http://119.45.176.130:4173";
+export const API_BASE_URL = "https://api.dmajorchoir.com";
 ```
 
 微信公众平台需要配置 request/download/upload 合法域名：
 
 ```text
-当前试用 API 为 http://119.45.176.130:4173。`dmajorchoir.com` 仍在备案申请中，预计 1-2 周完成。微信正式体验版通常需要 HTTPS 合法域名；备案完成前，如真机调试受限，请在开发者工具中开启“不校验合法域名、web-view、TLS 版本以及 HTTPS 证书”。
+request 合法域名: https://api.dmajorchoir.com
+uploadFile 合法域名: https://api.dmajorchoir.com
+downloadFile 合法域名: https://api.dmajorchoir.com
 ```
 
 如果对象存储临时签名 URL 使用独立域名，也需要加入 downloadFile 合法域名。更推荐通过 API 中转或绑定同源下载域名。
@@ -20,7 +22,7 @@ export const API_BASE_URL = "http://119.45.176.130:4173";
 
 1. 使用微信开发者工具打开小程序项目。
 2. 确认环境为 `production`。
-3. 确认 `API_BASE_URL=http://119.45.176.130:4173`。
+3. 确认 `API_BASE_URL=https://api.dmajorchoir.com`。
 4. 执行上传，版本号建议 `0.1.0-trial`。
 5. 在微信公众平台设置体验成员。
 6. 下载体验二维码并保存到 `docs/assets/wechat-trial-qrcode.png`。

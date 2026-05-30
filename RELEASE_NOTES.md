@@ -1,10 +1,16 @@
 # Release Notes
 
+## v1.2.0 - 2026-05-30
+
+- Switched production API to `https://api.dmajorchoir.com`.
+- Switched production admin entry to `https://admin.dmajorchoir.com`.
+- Updated Mini Program, Web config, backend CORS defaults, environment examples, release docs, and deployment docs for the ICP-approved domain deployment.
+
 ## v1.1.3 - 2026-05-20
 
-- Migrated the temporary trial endpoint to the new Tencent Cloud server `http://119.45.176.130:4173`.
+- Migrated the temporary trial endpoint to the new Tencent Cloud server.
 - Updated Web, Mini Program, backend CORS defaults, environment examples, and deployment docs for the new server.
-- Kept the project on temporary IP access while ICP filing is still pending.
+- Kept the project on temporary IP access while ICP filing was pending.
 
 ## v1.1.2 - 2026-05-20
 

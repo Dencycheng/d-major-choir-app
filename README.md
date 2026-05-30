@@ -1,6 +1,6 @@
 # D大调合唱团数字排练空间
 
-面向 D大调合唱团的团务管理、线上练习、谱库资料、点评反馈和数据看板一体化试用系统。
+面向 D大调合唱团的团务管理、线上练习、谱库资料、点评反馈和数据看板一体化 MVP 系统。
 
 ## 当前交付
 
@@ -66,20 +66,18 @@ npm start
 | `POST` | `/api/events/respond` | 成员反馈参加/请假 |
 | `POST` | `/api/events/checkin` | 成员签到 |
 
-## 当前试用地址
+## 正式部署地址
 
-- API：`http://119.45.176.130:4173`
-- Web 管理后台：`http://119.45.176.130:4173`
+- API：`https://api.dmajorchoir.com`
+- Web 管理后台：`https://admin.dmajorchoir.com`
 
-当前域名尚未完成 ICP 备案，试用阶段统一使用腾讯云 IP 地址。备案完成后，再按 [docs/deployment.md](/Users/dc/Documents/Codex/2026-05-14/files-mentioned-by-the-user-d/docs/deployment.md) 统一切换为正式域名、TLS、对象存储和微信小程序合法域名。
-
-`dmajorchoir.com` 仍在备案申请中，预计 1-2 周完成；备案完成前不要把小程序或后台配置切回域名。
+`dmajorchoir.com` ICP 备案已完成，正式部署按 [docs/deployment.md](/Users/dc/Documents/Codex/2026-05-14/files-mentioned-by-the-user-d/docs/deployment.md) 配置 DNS、TLS、数据库、文件存储和微信小程序合法域名。
 
 ## 重要安全原则
 
-- 录音、总谱、分声部资料、伴奏音频全部放在私有对象存储桶。
+- 录音、总谱、分声部资料、伴奏音频必须通过 API 鉴权读取，当前保存在服务器 `uploads/`。
 - 前端不得直接持有永久文件 URL。
-- 文件访问必须先经过 API 鉴权，再返回短期临时签名 URL。
+- 文件访问必须先经过 API 鉴权；后续迁移对象存储时再返回短期临时签名 URL。
 - 生产环境必须替换 `.env.example` 中所有 `CHANGE_ME`。
 
 ## 目录
@@ -88,9 +86,9 @@ npm start
 server.js                 API 与静态资源服务
 public/                   Web 管理后台与成员端预览
 miniprogram/              微信小程序成员端 MVP
-data/db.json              本地试用种子数据
-db/migrations/            生产库建表 SQL
-db/seeds/                 生产库初始化 SQL
+data/db.json              旧版迁移来源
+database/migrations/      SQLite migration
+database/seeds/           SQLite 初始化权限数据
 docs/                     部署、环境变量、回滚、测试与小程序说明
 uploads/                  本地上传文件目录，保留 .gitkeep，实际文件不入库
 scripts/                  migration/seed/smoke 执行脚本
@@ -106,8 +104,8 @@ scripts/                  migration/seed/smoke 执行脚本
 
 ## 发布
 
-当前版本：`1.1.3`。发布脚本和运行说明见 [docs/release-runbook.md](/Users/dc/Documents/Codex/2026-05-14/files-mentioned-by-the-user-d/docs/release-runbook.md)。
+当前版本：`1.2.0`。发布脚本和运行说明见 [docs/release-runbook.md](/Users/dc/Documents/Codex/2026-05-14/files-mentioned-by-the-user-d/docs/release-runbook.md)。
 
 ## 测试账号
 
-详见 [docs/test-accounts.md](/Users/dc/Documents/Codex/2026-05-14/files-mentioned-by-the-user-d/docs/test-accounts.md)。首次试用前请在生产库执行 seed 后立即修改默认密码或改为验证码/微信登录。
+详见 [docs/test-accounts.md](/Users/dc/Documents/Codex/2026-05-14/files-mentioned-by-the-user-d/docs/test-accounts.md)。首次正式使用前请在生产库执行 seed 后立即修改默认密码或改为验证码/微信登录。

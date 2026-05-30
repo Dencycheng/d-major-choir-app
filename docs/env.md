@@ -3,16 +3,15 @@
 | 变量 | 示例 | 说明 |
 | --- | --- | --- |
 | `NODE_ENV` | `production` | 运行环境。 |
-| `HOST` | `0.0.0.0` | 当前临时试用直接开放 `4173` 端口；正式反代后可改回 `127.0.0.1`。 |
+| `HOST` | `127.0.0.1` | 正式环境由 Nginx/HTTPS 反向代理转发到本地 Node 服务。 |
 | `PORT` | `4173` | API 服务端口。 |
-| `API_ORIGIN` | `http://119.45.176.130:4173` | 当前腾讯云临时 API 地址。 |
-| `ADMIN_ORIGIN` | `http://119.45.176.130:4173` | 当前腾讯云临时管理后台地址，用于 CORS 白名单。 |
-| `DATABASE_URL` | `postgres://...` | 生产 PostgreSQL 连接串。 |
-| `DATABASE_SSL` | `true` | 云数据库通常需要开启。 |
+| `API_ORIGIN` | `https://api.dmajorchoir.com` | 正式 API 地址。 |
+| `ADMIN_ORIGIN` | `https://admin.dmajorchoir.com` | 管理后台公网域名，用于 CORS 白名单。 |
+| `SQLITE_DB_PATH` | `data/dmajor.sqlite` | SQLite 数据库文件路径。 |
 | `JWT_SECRET` | `...` | 登录令牌签名密钥，至少 32 位。 |
 | `WECHAT_APP_ID` | `wx...` | 微信小程序 AppID。 |
 | `WECHAT_APP_SECRET` | `...` | 微信小程序密钥。 |
-| `OBJECT_STORAGE_PROVIDER` | `s3` | 对象存储类型，可映射 S3、COS、OSS。 |
+| `OBJECT_STORAGE_PROVIDER` | `local` | 当前 MVP 使用本地 `uploads/`；后续可映射 S3、COS、OSS。 |
 | `OBJECT_STORAGE_BUCKET` | `dmajor-choir-private-prod` | 私有桶名称。 |
 | `OBJECT_STORAGE_PRIVATE_BASE_URL` | `https://...` | 私有桶签名访问基地址。 |
 | `OBJECT_STORAGE_ACCESS_KEY_ID` | `...` | 对象存储访问 key。 |

@@ -6,19 +6,21 @@
 
 ```bash
 mkdir -p backups
-pg_dump "$DATABASE_URL" --format=custom --file="backups/dmajor_$(date +%Y%m%d_%H%M%S).dump"
+npm run db:backup
 ```
 
 建议策略：
 
-- 试用期：每日全量备份，保留 14 天。
+- 正式试运行期：每日全量备份，保留 14 天。
 - 重要操作前：手动备份。
-- 生产库开启 PITR 或至少启用云数据库自动备份。
+- 将 `backups/` 定期复制到云硬盘快照或对象存储。
 
 ## 数据库恢复
 
 ```bash
-pg_restore --clean --if-exists --dbname "$DATABASE_URL" backups/<backup-file>.dump
+pm2 stop d-major-choir
+cp backups/<backup-file>.sqlite data/dmajor.sqlite
+pm2 start d-major-choir
 ```
 
 恢复前先暂停 API 写入流量，避免恢复过程中产生新数据。
@@ -28,7 +30,7 @@ pg_restore --clean --if-exists --dbname "$DATABASE_URL" backups/<backup-file>.du
 ```bash
 git fetch origin
 git checkout <LAST_GOOD_COMMIT>
-npm ci --omit=dev
+# 当前版本没有第三方依赖，可跳过安装；后续如新增依赖，使用 npm install --omit=dev
 NODE_ENV=production npm start
 ```
 

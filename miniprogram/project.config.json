@@ -1,7 +1,7 @@
 {
   "appid": "wx2437c6a534ef644b",
   "projectname": "d-major-choir-miniprogram",
-  "description": "D大调合唱团成员端小程序 MVP v1.1.3",
+  "description": "D大调合唱团成员端小程序 MVP v1.2.0",
   "miniprogramRoot": "./",
   "compileType": "miniprogram",
   "setting": {

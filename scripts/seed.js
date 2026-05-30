@@ -1,13 +1,13 @@
 const fs = require("fs");
 const path = require("path");
 
-const seed = path.join(__dirname, "..", "db", "seeds", "001_trial_seed.sql");
+const seed = path.join(__dirname, "migrate-db-json.js");
 
-console.log("Seed file prepared:");
+console.log("SQLite seed/import command:");
 console.log(seed);
 console.log("");
-console.log("Run against production PostgreSQL with:");
-console.log('psql "$DATABASE_URL" -f db/seeds/001_trial_seed.sql');
+console.log("Run:");
+console.log("npm run db:migrate-json");
 
 if (!fs.existsSync(seed)) {
   process.exitCode = 1;

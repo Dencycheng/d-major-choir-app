@@ -1,10 +1,12 @@
 node_modules/
+d-major-choir-app/
 .env
 .env.*
 !.env.example
 dist/
 coverage/
 *.log
+*.swp
 .DS_Store
 backups/
 tmp/
