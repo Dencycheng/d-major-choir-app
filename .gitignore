@@ -1,0 +1,15 @@
+.env
+data/*.db
+*.db
+*.sqlite
+__pycache__/
+.pytest_cache/
+.venv/
+node_modules/
+dist/
+uploads/*
+!uploads/.gitkeep
+backend/uploads/*
+!backend/uploads/.gitkeep
+d-major-choir-app-github-v1/
+.DS_Store

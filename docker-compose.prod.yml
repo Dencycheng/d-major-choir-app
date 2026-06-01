@@ -1,0 +1,81 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - choir_app_pgdata_prod:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      UPLOAD_DIR: ${UPLOAD_DIR}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_ALGORITHM: ${JWT_ALGORITHM}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      AUTO_CREATE_TABLES: ${AUTO_CREATE_TABLES}
+      ALLOW_DEMO_LOGIN_CODE: ${ALLOW_DEMO_LOGIN_CODE}
+      AUTH_ALLOW_OPEN_REGISTRATION: ${AUTH_ALLOW_OPEN_REGISTRATION}
+      SMS_PROVIDER: ${SMS_PROVIDER}
+      SMS_CODE_EXPIRE_SECONDS: ${SMS_CODE_EXPIRE_SECONDS}
+      SMS_RESEND_INTERVAL_SECONDS: ${SMS_RESEND_INTERVAL_SECONDS}
+      SMS_MAX_VERIFY_ATTEMPTS: ${SMS_MAX_VERIFY_ATTEMPTS}
+      TENCENTCLOUD_SECRET_ID: ${TENCENTCLOUD_SECRET_ID}
+      TENCENTCLOUD_SECRET_KEY: ${TENCENTCLOUD_SECRET_KEY}
+      TENCENT_SMS_REGION: ${TENCENT_SMS_REGION}
+      TENCENT_SMS_SDK_APP_ID: ${TENCENT_SMS_SDK_APP_ID}
+      TENCENT_SMS_SIGN_NAME: ${TENCENT_SMS_SIGN_NAME}
+      TENCENT_SMS_TEMPLATE_ID: ${TENCENT_SMS_TEMPLATE_ID}
+      ALLOW_LEGACY_USER_ID_TOKEN: ${ALLOW_LEGACY_USER_ID_TOKEN}
+      ENABLE_PUBLIC_UPLOADS: ${ENABLE_PUBLIC_UPLOADS}
+      FILE_SIGNED_URL_EXPIRE_SECONDS: ${FILE_SIGNED_URL_EXPIRE_SECONDS}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - ./backend/uploads:/app/uploads
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)\""]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  admin-web:
+    build:
+      context: ./admin-web
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8080:80"
+    restart: unless-stopped
+
+  member-web:
+    build:
+      context: ./member-web
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8090:80"
+    restart: unless-stopped
+
+volumes:
+  choir_app_pgdata_prod:

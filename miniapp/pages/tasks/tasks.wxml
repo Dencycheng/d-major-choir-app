@@ -1,0 +1,28 @@
+<view class="card">
+  <view class="h1">练习任务</view>
+  <view class="muted">查看每周练习任务，完成录音打卡，并查看老师/声部长点评。</view>
+  <view wx:if="{{recording}}" class="recording">正在录音中，请唱完后点击停止。</view>
+  <view wx:for="{{tasks}}" wx:key="task_id" class="list-item">
+    <view class="item-title">{{item.title}}</view>
+    <view class="muted">截止：{{item.deadline}}</view>
+    <view class="muted">{{item.description || ''}}</view>
+    <button size="mini" bindtap="onStartRecord" data-id="{{item.task_id}}" disabled="{{recording}}">开始录音</button>
+    <button size="mini" bindtap="onStopRecord" wx:if="{{recording && currentTaskId === item.task_id}}">停止并上传</button>
+    <button size="mini" bindtap="onSubmitDemoRecord" data-id="{{item.task_id}}">Demo打卡</button>
+    <button size="mini" bindtap="onLoadRecords" data-id="{{item.task_id}}">查看我的打卡</button>
+  </view>
+  <view wx:if="{{tasks.length === 0}}" class="muted">暂无练习任务。</view>
+</view>
+
+<view class="card" wx:if="{{records.length > 0}}">
+  <view class="section-title">我的打卡与点评</view>
+  <view wx:for="{{records}}" wx:key="practice_record_id" class="list-item">
+    <view>打卡时间：{{item.created_at}}</view>
+    <view class="muted">练习次数：{{item.practice_count || 1}}｜时长：{{item.audio_duration || 0}}秒</view>
+    <view class="muted">备注：{{item.note || '无'}}</view>
+    <view wx:if="{{item.comments && item.comments.length > 0}}" class="comment-box">
+      <view wx:for="{{item.comments}}" wx:key="comment_id">点评：{{item.content}}</view>
+    </view>
+    <view wx:else class="muted">暂无点评。</view>
+  </view>
+</view>

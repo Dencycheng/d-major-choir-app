@@ -1,0 +1,14 @@
+page { background:#050505; color:#f8f2e8; font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif; }
+.card { margin:24rpx; padding:30rpx; background:linear-gradient(145deg,#151515,#090909); border:1rpx solid rgba(212,170,99,.32); border-radius:30rpx; box-shadow:0 14rpx 40rpx rgba(0,0,0,.42); }
+.h1 { font-size:44rpx; font-weight:800; margin-bottom:12rpx; color:#fff; }
+.muted { color:#b7aea2; line-height:1.6; }
+.btn, button { background:linear-gradient(135deg,#d4aa63,#b98536); color:#111; border-radius:18rpx; padding:20rpx 24rpx; margin-top:20rpx; font-weight:800; }
+.ghost { background:#1b1b1b!important; color:#d4aa63!important; border:1rpx solid rgba(212,170,99,.34); }
+.section-title { margin-top: 28rpx; margin-bottom: 12rpx; font-weight: 800; color:#d4aa63; }
+.list-item { margin: 16rpx 0; padding: 22rpx; background:#151515; border:1rpx solid rgba(212,170,99,.18); border-radius: 20rpx; }
+.stats { display:grid; grid-template-columns:repeat(2, 1fr); gap:12rpx; margin-top:20rpx; }
+.stats view { background:#111; border:1rpx solid rgba(212,170,99,.2); border-radius:18rpx; padding:18rpx; color:#d4aa63; font-weight:700; }
+.input, input { color:#fff; background:#090909; border:1rpx solid rgba(212,170,99,.34); border-radius:18rpx; }
+button[size="mini"] { margin-right: 12rpx; margin-top: 12rpx; }
+.brand-logo { width:320rpx; height:auto; display:block; margin:10rpx auto 24rpx; }
+.eyebrow { color:#d4aa63!important; font-weight:800; letter-spacing:2rpx; font-size:24rpx; }

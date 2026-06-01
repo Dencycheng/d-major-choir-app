@@ -1,0 +1,9 @@
+.hero { background: linear-gradient(135deg,#eff8ee,#ffffff); }
+.eyebrow { color:#5b7d58; font-weight:700; letter-spacing:2rpx; font-size:24rpx; }
+.input { margin:18rpx 0; padding:20rpx 24rpx; border:1rpx solid #d7e3d2; border-radius:18rpx; background:#fff; }
+.success { margin-top:18rpx; color:#315c37; background:#eef8eb; padding:18rpx; border-radius:18rpx; }
+.ghost { background:#eef5ec; color:#315c37; border-radius:18rpx; margin-top:18rpx; }
+.picker { padding:20rpx; background:#f7faf5; border-radius:18rpx; margin:16rpx 0; }
+.join-row { display:flex; gap:16rpx; align-items:center; }
+.flex { flex:1; }
+.small { width:210rpx; font-size:28rpx; }

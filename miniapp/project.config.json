@@ -1,0 +1,19 @@
+{
+  "description": "合唱团成员端小程序 Demo",
+  "packOptions": {
+    "ignore": []
+  },
+  "setting": {
+    "urlCheck": true,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "compileHotReLoad": true
+  },
+  "compileType": "miniprogram",
+  "libVersion": "3.4.0",
+  "appid": "wx2437c6a534ef644b",
+  "projectname": "choir-member-miniapp",
+  "condition": {}
+}

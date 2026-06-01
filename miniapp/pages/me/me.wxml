@@ -1,0 +1,42 @@
+<view class="card hero">
+  <image class="brand-logo" mode="widthFix" src="/assets/dmajor-logo.png"/>
+  <view class="eyebrow">CHOIR MEMBER MINIAPP</view>
+  <view class="h1">合唱团成员端</view>
+  <view class="muted">登录、申请加入、选择合唱团，开始查看活动、任务与谱库。</view>
+</view>
+
+<view class="card">
+  <image class="brand-logo" mode="widthFix" src="/assets/dmajor-logo.png"/>
+  <view class="section-title">1. 成员登录</view>
+  <input class="input" placeholder="手机号" value="{{mobile}}" bindinput="onMobile" />
+  <input class="input" placeholder="姓名" value="{{name}}" bindinput="onName" />
+  <input class="input" placeholder="短信验证码" value="{{smsCode}}" bindinput="onSmsCode" />
+  <button class="ghost" bindtap="onSendCode" loading="{{loading}}">发送验证码</button>
+  <button class="btn" bindtap="onLogin" loading="{{loading}}">成员登录</button>
+  <button class="ghost" bindtap="onLogout">退出</button>
+  <view wx:if="{{user}}" class="success">当前用户：{{user.name || user.mobile}}</view>
+</view>
+
+<view class="card">
+  <view class="section-title">2. 我的合唱团</view>
+  <view class="muted" wx:if="{{choirs.length === 0}}">还没有加入合唱团。请输入后台生成的邀请码申请加入，管理员审批后刷新。</view>
+  <picker wx:if="{{choirs.length > 0}}" range="{{choirNames}}" bindchange="onChooseChoir">
+    <view class="picker">当前：{{currentChoir.choir_name || '请选择合唱团'}} ▾</view>
+  </picker>
+  <view wx:for="{{choirs}}" wx:key="choir_id" class="list-item">
+    <view>{{item.choir_name}}</view>
+    <view class="muted">邀请码：{{item.invite_code}}</view>
+  </view>
+  <view class="join-row">
+    <input class="input flex" placeholder="输入邀请码" value="{{inviteCode}}" bindinput="onInviteCode" />
+    <button class="btn small" bindtap="onJoin">申请加入</button>
+  </view>
+  <button class="ghost" bindtap="load">刷新我的合唱团</button>
+</view>
+
+<view class="card">
+  <view class="section-title">3. 接口地址</view>
+  <view class="muted">正式版使用 HTTPS API 域名；仅调试时临时修改。</view>
+  <input class="input" value="{{apiBase}}" bindinput="onApiBase" />
+  <button class="ghost" bindtap="onSaveApiBase">保存接口地址</button>
+</view>

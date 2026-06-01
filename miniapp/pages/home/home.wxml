@@ -1,0 +1,22 @@
+<view class="card">
+  <image class="brand-logo" mode="widthFix" src="/assets/dmajor-logo.png"/>
+  <view class="h1">首页</view>
+  <view wx:if="{{choir}}">
+    <view class="muted">当前合唱团</view>
+    <view class="choir-name">{{choir.choir_name}}</view>
+    <view class="stats" wx:if="{{dashboard}}">
+      <view>成员 {{dashboard.member_count}}</view>
+      <view>活动 {{dashboard.event_count}}</view>
+      <view>任务 {{dashboard.task_count}}</view>
+      <view>打卡 {{dashboard.practice_record_count}}</view>
+    </view>
+    <view class="section-title">最近活动</view>
+    <view wx:for="{{events}}" wx:key="event_id" class="list-item">{{item.title}}｜{{item.location || '未设置地点'}}</view>
+    <view wx:if="{{events.length === 0}}" class="muted">暂无活动。</view>
+    <view class="section-title">本周任务</view>
+    <view wx:for="{{tasks}}" wx:key="task_id" class="list-item">{{item.title}}</view>
+    <view wx:if="{{tasks.length === 0}}" class="muted">暂无练习任务。</view>
+  </view>
+  <view wx:else class="muted">请先在“我的”页面登录、申请加入并选择合唱团。</view>
+  <button class="ghost" bindtap="load">刷新</button>
+</view>

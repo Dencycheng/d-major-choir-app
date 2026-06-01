@@ -1,0 +1,27 @@
+<view class="card">
+  <view class="h1">谱库</view>
+  <view class="muted">查看总谱、分声部谱、伴奏、音频和视频谱。</view>
+  <view wx:for="{{works}}" wx:key="work_id" class="list-item" bindtap="onSelectWork" data-id="{{item.work_id}}">
+    <view>{{item.title}}</view>
+    <view class="muted">{{item.composer || ''}}｜{{item.language || ''}}</view>
+  </view>
+</view>
+
+<view class="card" wx:if="{{videoUrl}}">
+  <view class="h1">视频谱播放</view>
+  <video id="scoreVideo" src="{{videoUrl}}" controls object-fit="contain"></video>
+  <view class="rate-row">
+    <button wx:for="{{rates}}" wx:key="*this" size="mini" bindtap="onRate" data-rate="{{item}}">{{item}}x</button>
+  </view>
+</view>
+
+<view class="card" wx:if="{{selectedWork}}">
+  <view class="h1">{{selectedWork.title}}</view>
+  <view class="muted" wx:if="{{loading}}">资料加载中...</view>
+  <view wx:for="{{resources}}" wx:key="resource_id" class="list-item">
+    <view>{{item.resource_name}}</view>
+    <view class="muted">{{item.resource_type}}｜{{item.file_format}}</view>
+    <button size="mini" bindtap="onOpenResource" data-id="{{item.resource_id}}">打开/播放</button>
+  </view>
+  <view wx:if="{{!loading && resources.length === 0}}" class="muted">暂无资料。</view>
+</view>

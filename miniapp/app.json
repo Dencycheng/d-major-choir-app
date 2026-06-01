@@ -1,0 +1,45 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/tasks/tasks",
+    "pages/library/library",
+    "pages/events/events",
+    "pages/me/me"
+  ],
+  "window": {
+    "navigationBarTitleText": "合唱团练习",
+    "navigationBarBackgroundColor": "#315c37",
+    "navigationBarTextStyle": "white"
+  },
+  "tabBar": {
+    "color": "#777777",
+    "selectedColor": "#315c37",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/tasks/tasks",
+        "text": "任务"
+      },
+      {
+        "pagePath": "pages/library/library",
+        "text": "谱库"
+      },
+      {
+        "pagePath": "pages/events/events",
+        "text": "活动"
+      },
+      {
+        "pagePath": "pages/me/me",
+        "text": "我的"
+      }
+    ]
+  },
+  "permission": {
+    "scope.record": {
+      "desc": "用于提交合唱练习录音打卡"
+    }
+  }
+}

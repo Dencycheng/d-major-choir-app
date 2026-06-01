@@ -1,0 +1,2 @@
+.choir-name { font-size:42rpx; font-weight:700; margin:12rpx 0 20rpx; color:#17201a; }
+.ghost { background:#eef5ec; color:#315c37; border-radius:18rpx; margin-top:18rpx; }

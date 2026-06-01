@@ -1,0 +1,13 @@
+<view class="card">
+  <view class="h1">活动</view>
+  <view class="muted">排练、演出、会议，以及签到和请假入口。</view>
+  <view wx:for="{{events}}" wx:key="event_id" class="list-item">
+    <view class="item-title">{{item.title}}</view>
+    <view class="muted">{{item.location || '未设置地点'}}｜{{item.start_time}}</view>
+    <input class="input" placeholder="签到码，可向管理员获取" value="{{checkinCodes[item.event_id] || ''}}" data-id="{{item.event_id}}" bindinput="onCodeInput" />
+    <button size="mini" bindtap="onRespond" data-id="{{item.event_id}}" data-status="attend">确认参加</button>
+    <button size="mini" bindtap="onCheckin" data-id="{{item.event_id}}">签到</button>
+    <button size="mini" bindtap="onLeave" data-id="{{item.event_id}}">请假</button>
+  </view>
+  <view wx:if="{{events.length === 0}}" class="muted">暂无活动。</view>
+</view>

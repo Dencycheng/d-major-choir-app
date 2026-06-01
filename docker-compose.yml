@@ -1,0 +1,64 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: choir_app
+      POSTGRES_USER: choir_app
+      POSTGRES_PASSWORD: choir_app_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - choir_app_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U choir_app -d choir_app"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg2://choir_app:choir_app_password@db:5432/choir_app
+      UPLOAD_DIR: /app/uploads
+      CORS_ORIGINS: http://localhost:5173,http://127.0.0.1:5173,http://localhost:8080,http://127.0.0.1:8080,http://localhost:8090,http://127.0.0.1:8090
+      JWT_SECRET_KEY: change-me-in-production
+      ENABLE_PUBLIC_UPLOADS: "false"
+      AUTO_CREATE_TABLES: "true"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/uploads:/app/uploads
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)\""]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  admin-web:
+    build:
+      context: ./admin-web
+      args:
+        VITE_API_BASE_URL: http://localhost:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+
+  member-web:
+    build:
+      context: ./member-web
+      args:
+        VITE_API_BASE_URL: http://localhost:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "8090:80"
+
+volumes:
+  choir_app_pgdata:

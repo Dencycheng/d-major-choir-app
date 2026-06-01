@@ -1,0 +1,12 @@
+{
+  "admin": {
+    "mobile": "13800000000",
+    "code": "000000"
+  },
+  "member": {
+    "mobile": "13900000001",
+    "code": "000000"
+  },
+  "invite_code": "DMAJOR",
+  "description": "Executable seed script: scripts/seed_v1.py"
+}
