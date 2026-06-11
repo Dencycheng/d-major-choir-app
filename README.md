@@ -1,25 +1,61 @@
 # D大调合唱团数字排练空间
 
-面向 D大调合唱团的团务管理、线上练习、谱库资料、点评反馈和数据看板一体化 MVP 系统。
+面向 D大调合唱团的团务管理、线上练习、谱库资料、点评反馈和数据看板一体化系统（V2.1，正式登录体系）。
 
-## 当前交付
+## 当前交付（V2.1）
 
-- Web 管理后台：谱库管理、练习任务、打卡点评、活动签到、数据概览。
-- 成员端：今日待办、谱库查看/播放、练习录音上传、活动参加/请假/签到、点评反馈。
-- 后端 API：作品 CRUD、资料上传、任务 CRUD、录音上传、点评、活动 CRUD、团员管理、角色权限、考勤写入、文件读取。
-- 初始化数据：四个声部、核心角色、测试成员、测试活动、测试曲目、谱库资料与练习任务。
-- 本地数据库：业务数据写入 `data/dmajor.sqlite`；`data/db.json` 仅作为旧版迁移来源。
-- 本地文件：上传的谱子、音频、视频、录音、头像写入 `uploads/`，并通过 `/api/files/:fileId` 读取。
+- 正式登录体系：后台邮箱/手机号 + 密码（scrypt 哈希、失败锁定、首登强制改密、登录日志）；小程序 `wx.login` 静默登录。
+- 邀请码入团：后台生成邀请码 → 小程序提交入团申请 → 审核通过自动建档绑定微信。
+- RBAC 权限与数据隔离：全部接口 Bearer Token 鉴权；普通成员看不到他人录音/请假理由/手机号明文；声部长只管本声部；文件流鉴权访问；操作审计日志。
+- Web 管理后台：谱库管理、练习任务、打卡点评、活动签到、成员/角色、邀请与入团审核、登录/操作日志、数据概览。
+- 成员端小程序：今日待办、谱库查看/播放（视频 0.75x–1.5x 倍速）、练习录音打卡、活动参加/请假/签到、点评反馈、入团申请页。
+- 数据库：SQLite（`node:sqlite`，零第三方依赖），migrations + seed + 备份/恢复脚本；生产环境数据与代码目录分离。
+
+## 环境要求
+
+- Node.js >= 22.5（使用内置 `node:sqlite`）
+- 无任何第三方 npm 依赖
 
 ## 本地运行
 
 ```bash
-npm start
+cp .env.example .env                  # 配置 JWT_SECRET、ADMIN_EMAIL、ADMIN_PASSWORD 等
+npm run migrate                       # 建表（含 V2.1 账号体系）
+npm run seed                          # 可选：导入演示数据（声部/活动/曲目等）
+npm run create-admin                  # 创建超级管理员（首登强制改密）
+npm start                             # http://127.0.0.1:4173
 ```
 
-打开 `http://127.0.0.1:4173`。
+打开 `http://127.0.0.1:4173`，使用 `.env` 中的管理员账号登录后台。
 
-如果直接打开 `public/index.html`，前端会默认连接 `http://127.0.0.1:4173`，因此仍需要先启动 API 服务。
+小程序：微信开发者工具导入 `miniprogram/`，本地联调将 `miniprogram/config/index.js` 的 `ENV` 改为 `development` 并勾选"不校验合法域名"；未配置 `WECHAT_APP_SECRET` 时开发模式自动使用模拟 openid，可直接走"邀请码 → 入团 → 审核"流程。
+
+## 冒烟测试
+
+```bash
+# 服务启动后：
+ADMIN_EMAIL=admin@dmajorchoir.com ADMIN_PASSWORD=<初始密码> npm run smoke
+```
+
+34 步覆盖：登录/改密/锁定 → 邀请码 → 入团审核 → 权限隔离（401/403/428）→ 谱库上传与文件流鉴权 → 活动响应/签到 → 打卡 → 点评 → 登出撤销。
+
+## 常用脚本
+
+| 命令 | 说明 |
+| --- | --- |
+| `npm run migrate` | 应用 `database/migrations/` 全部迁移 |
+| `npm run seed` | 从 `data/db.json` 导入演示数据（已有数据时自动跳过） |
+| `npm run create-admin` | 创建/重置超级管理员（`--reset-password` 重置密码） |
+| `npm run smoke` | 全链路冒烟测试 |
+| `npm run backup` / `npm run restore -- <dir>` | SQLite + uploads 备份/恢复（保留 30 份） |
+
+## 文档
+
+- 部署：`docs/deployment.md`（域名/Nginx/PM2/数据目录分离/微信配置）
+- 验收清单：`docs/acceptance-v2.1.md`
+- 回滚：`docs/rollback.md`
+- 测试账号：`docs/test-accounts.md`
+- 版本记录：`RELEASE_NOTES.md`
 
 ## MVP 真实闭环
 

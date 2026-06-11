@@ -4,7 +4,8 @@
     "pages/activities/activities",
     "pages/practice/practice",
     "pages/library/library",
-    "pages/mine/mine"
+    "pages/mine/mine",
+    "pages/join/join"
   ],
   "window": {
     "navigationBarTitleText": "D大调合唱团",

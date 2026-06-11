@@ -1,0 +1,61 @@
+<view class="page">
+  <view class="hero">
+    <view class="hero-title">D大调合唱团</view>
+    <view class="hero-sub">凭邀请码申请入团 · 审核通过后即可一起唱歌</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="card center">加载中…</view>
+
+  <block wx:elif="{{status === 'pending'}}">
+    <view class="card center">
+      <view class="status-icon">🎵</view>
+      <view class="status-title">申请已提交</view>
+      <view class="status-desc">声部长 / 团务正在审核，请耐心等待。审核通过后再次打开小程序即可进入。</view>
+      <button class="btn-gold" bindtap="checkStatus">刷新审核状态</button>
+    </view>
+  </block>
+
+  <block wx:elif="{{status === 'rejected'}}">
+    <view class="card center">
+      <view class="status-icon">💬</view>
+      <view class="status-title">申请未通过</view>
+      <view class="status-desc" wx:if="{{rejectReason}}">留言：{{rejectReason}}</view>
+      <view class="status-desc" wx:else>可以联系团务了解详情，或重新提交申请。</view>
+      <button class="btn-gold" bindtap="retry">重新填写申请</button>
+    </view>
+  </block>
+
+  <block wx:elif="{{status === 'form'}}">
+    <view class="card">
+      <view class="field">
+        <view class="label">邀请码</view>
+        <input class="input" placeholder="例如 DMJ2026-XXXX" value="{{form.inviteCode}}" data-field="inviteCode" bindinput="onInput" />
+      </view>
+      <view class="field">
+        <view class="label">姓名</view>
+        <input class="input" placeholder="真实姓名" value="{{form.name}}" data-field="name" bindinput="onInput" />
+      </view>
+      <view class="field">
+        <view class="label">手机号</view>
+        <input class="input" type="number" maxlength="11" placeholder="11位手机号" value="{{form.mobile}}" data-field="mobile" bindinput="onInput" />
+      </view>
+      <view class="field">
+        <view class="label">意向声部</view>
+        <picker mode="selector" range="{{sections}}" range-key="label" value="{{sectionIndex}}" bindchange="onSectionChange">
+          <view class="input picker {{sectionIndex < 0 ? 'placeholder' : ''}}">
+            {{sectionIndex >= 0 ? sections[sectionIndex].label : '请选择声部'}}
+          </view>
+        </picker>
+      </view>
+      <view class="field">
+        <view class="label">音域（选填）</view>
+        <input class="input" placeholder="例如 G3–A5" value="{{form.vocalRange}}" data-field="vocalRange" bindinput="onInput" />
+      </view>
+      <view class="field">
+        <view class="label">合唱经验（选填）</view>
+        <textarea class="textarea" placeholder="简单介绍一下你的合唱经历" value="{{form.experience}}" data-field="experience" bindinput="onInput" />
+      </view>
+      <button class="btn-gold" loading="{{submitting}}" bindtap="submit">提交入团申请</button>
+    </view>
+  </block>
+</view>

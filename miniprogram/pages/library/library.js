@@ -30,7 +30,7 @@ Page({
           ...resource,
           isAudio: isAudio(resource),
           isVideo: isVideo(resource),
-          fileUrl: api.absoluteUrl(resource.fileUrl),
+          fileUrl: api.fileUrl(resource.fileUrl),
           displaySection: resource.section === "ALL" ? "全团" : sectionLabel(data.sections, resource.section)
         }));
 

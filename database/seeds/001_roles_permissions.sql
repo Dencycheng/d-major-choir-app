@@ -39,3 +39,11 @@ INSERT OR IGNORE INTO role_permissions (role_id, permission_code) VALUES
   ('role-section-leader', 'feedback_comment'),
   ('role-section-leader', 'attendance_manage'),
   ('role-principal', 'feedback_comment');
+
+-- V2.1 新增权限映射（dashboard / 邀请管理 / 角色管理）
+INSERT OR IGNORE INTO role_permissions (role_id, permission_code) VALUES
+  ('role-leader', 'dashboard_view'),
+  ('role-leader', 'invite_manage'),
+  ('role-leader', 'role_manage'),
+  ('role-conductor', 'dashboard_view'),
+  ('role-section-leader', 'dashboard_view');

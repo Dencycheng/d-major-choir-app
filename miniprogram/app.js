@@ -1,17 +1,23 @@
-const { DEFAULT_MEMBER_ID } = require("./config/index");
+const { ensureLogin } = require("./utils/request");
 
 App({
   globalData: {
-    memberId: DEFAULT_MEMBER_ID
+    auth: null
   },
 
   onLaunch() {
-    const savedMemberId = wx.getStorageSync("memberId");
-    if (!savedMemberId) {
-      wx.setStorageSync("memberId", DEFAULT_MEMBER_ID);
-      this.globalData.memberId = DEFAULT_MEMBER_ID;
-      return;
-    }
-    this.globalData.memberId = savedMemberId;
+    // V2.1：取消固定 memberId，使用微信登录绑定真实成员身份
+    wx.removeStorageSync("memberId");
+    ensureLogin()
+      .then(auth => {
+        this.globalData.auth = auth;
+        if (!auth.member) {
+          // 未绑定成员：进入邀请码入团流程
+          wx.reLaunch({ url: "/pages/join/join" });
+        }
+      })
+      .catch(error => {
+        console.error("[auth] 登录失败", error);
+      });
   }
 });

@@ -14,3 +14,7 @@ uploads/*
 !uploads/.gitkeep
 data/*.sqlite
 data/*.sqlite-*
+*.sqlite
+*.sqlite3
+data/*.db
+server.v1.bak.js

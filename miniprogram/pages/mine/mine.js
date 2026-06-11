@@ -26,7 +26,7 @@ Page({
       const member = data.currentMember || {};
       member.sectionLabel = sectionLabel(data.sections, member.section);
       member.initial = (member.name || "?").slice(0, 1);
-      member.avatarFullUrl = member.avatarUrl ? api.absoluteUrl(member.avatarUrl) : "";
+      member.avatarFullUrl = member.avatarUrl ? api.fileUrl(member.avatarUrl) : "";
 
       const eventsById = {};
       (data.events || []).forEach(event => {

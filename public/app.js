@@ -4,6 +4,7 @@ const API_BASE_URL = window.DMAJOR_API_BASE_URL || (window.location.protocol ===
 
 const state = {
   view: "admin",
+  authScreen: "",
   adminTab: "library",
   memberTab: "home",
   data: null,
@@ -13,16 +14,29 @@ const state = {
   editingEventId: ""
 };
 
+function getToken() {
+  return localStorage.getItem("dmajor_token") || "";
+}
+
+function setToken(token) {
+  if (token) localStorage.setItem("dmajor_token", token);
+  else localStorage.removeItem("dmajor_token");
+}
+
+function authHeaders(extra = {}) {
+  const token = getToken();
+  return token ? { Authorization: `Bearer ${token}`, ...extra } : extra;
+}
+
 const api = {
   async get(path) {
-    const res = await fetch(`${API_BASE_URL}${path}`, { credentials: "include" });
+    const res = await fetch(`${API_BASE_URL}${path}`, { headers: authHeaders() });
     return parseResponse(res);
   },
   async json(method, path, body) {
     const res = await fetch(`${API_BASE_URL}${path}`, {
       method,
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
+      headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify(body)
     });
     return parseResponse(res);
@@ -30,7 +44,7 @@ const api = {
   async form(path, formData) {
     const res = await fetch(`${API_BASE_URL}${path}`, {
       method: "POST",
-      credentials: "include",
+      headers: authHeaders(),
       body: formData
     });
     return parseResponse(res);
@@ -42,6 +56,17 @@ const api = {
 
 async function parseResponse(res) {
   const data = await res.json().catch(() => ({}));
+  if (res.status === 401) {
+    setToken("");
+    state.authScreen = "login";
+    renderAuth();
+    throw new Error(data.error || "请重新登录");
+  }
+  if (res.status === 428) {
+    state.authScreen = "change-password";
+    renderAuth();
+    throw new Error(data.error || "请先修改初始密码");
+  }
   if (!res.ok) throw new Error(data.error || "操作失败");
   return data;
 }
@@ -150,6 +175,11 @@ function topbar() {
         <button class="${state.view === "admin" ? "active" : ""}" data-view="admin">管理后台</button>
         <button class="${state.view === "member" ? "active" : ""}" data-view="member">成员端</button>
       </div>
+      <div class="topbar-user">
+        <span>${h(state.data.auth?.user?.name || state.data.auth?.user?.nickname || "已登录")}${state.data.auth?.isAdmin ? " · 超级管理员" : state.data.currentMember ? ` · ${h(state.data.currentMember.role)}` : ""}</span>
+        <button class="ghost" data-change-password>改密码</button>
+        <button class="ghost" data-logout>退出</button>
+      </div>
     </header>
   `;
 }
@@ -167,6 +197,7 @@ function shell() {
 function adminView() {
   const tabs = [
     ["members", "团员管理"],
+    ["invites", "邀请入团"],
     ["library", "谱库管理"],
     ["tasks", "练习任务"],
     ["records", "打卡点评"],
@@ -189,6 +220,7 @@ function adminView() {
         ${state.adminTab === "records" ? adminRecords() : ""}
         ${state.adminTab === "events" ? adminEvents() : ""}
         ${state.adminTab === "dashboard" ? adminDashboard() : ""}
+        ${state.adminTab === "invites" ? adminInvites() : ""}
       </main>
     </div>
   `;
@@ -222,6 +254,7 @@ function memberView() {
 
 function adminDashboard() {
   const dashboard = state.data.dashboard;
+  if (!dashboard) return `<section><div class="section-title"><div><h2>数据概览</h2><p>当前账号没有数据看板权限</p></div></div></section>`;
   return `
     <section>
       <div class="section-title">
@@ -1082,11 +1115,221 @@ async function deleteItem(path, message) {
   hydrateFromPayload(result, message);
 }
 
+function adminInvites() {
+  const invites = state.data.invites || [];
+  const requests = state.data.joinRequests || [];
+  const pending = requests.filter(item => item.status === "待审核");
+  const reviewed = requests.filter(item => item.status !== "待审核");
+  const sections = state.data.sections || [];
+  return `
+    <section>
+      <div class="section-title">
+        <div>
+          <h2>邀请与入团</h2>
+          <p>生成邀请码 → 新成员小程序申请 → 审核分配声部</p>
+        </div>
+      </div>
+      <div class="card">
+        <h3>创建邀请码</h3>
+        <form id="invite-form" class="form-grid">
+          <label>邀请码（留空自动生成）<input name="code" placeholder="如 DMJ2026" /></label>
+          <label>目标声部
+            <select name="targetSection">
+              <option value="">不限</option>
+              ${sections.map(item => `<option value="${item.code}">${h(item.name)}</option>`).join("")}
+            </select>
+          </label>
+          <label>最大使用次数（0 为不限）<input name="maxUses" type="number" min="0" value="0" /></label>
+          <label>有效期至<input name="expiresAt" type="date" /></label>
+          <button type="submit" class="primary">生成邀请码</button>
+        </form>
+      </div>
+      <div class="card">
+        <h3>邀请码列表</h3>
+        ${invites.length ? invites.map(invite => `
+          <div class="row-item">
+            <div>
+              <strong style="font-size:18px;letter-spacing:2px">${h(invite.code)}</strong>
+              <small>${invite.status === "active" ? "可用" : "已停用"} · ${invite.targetSection ? `声部 ${h(invite.targetSection)}` : "声部不限"} · 已用 ${invite.usedCount}${invite.maxUses ? `/${invite.maxUses}` : ""} 次${invite.expiresAt ? ` · ${h(invite.expiresAt)} 截止` : ""}</small>
+            </div>
+            ${invite.status === "active" ? `<button class="ghost" data-disable-invite="${invite.id}">停用</button>` : ""}
+          </div>
+        `).join("") : "<p class=\"empty\">还没有邀请码，先生成一个吧。</p>"}
+      </div>
+      <div class="card">
+        <h3>待审核入团申请（${pending.length}）</h3>
+        ${pending.length ? pending.map(request => `
+          <div class="row-item">
+            <div>
+              <strong>${h(request.name)}</strong>
+              <small>意向声部：${h(request.sectionPreference || "未填")} · 音域：${h(request.voiceRange || "未填")} · 手机：${h(request.mobile || "未填")}</small>
+              <small>${h(request.experience || "")}</small>
+            </div>
+            <div class="row-actions">
+              <select data-join-section="${request.id}">
+                ${sections.map(item => `<option value="${item.code}" ${item.code === request.sectionPreference ? "selected" : ""}>${h(item.name)}</option>`).join("")}
+              </select>
+              <button class="primary" data-approve-join="${request.id}">通过</button>
+              <button class="ghost" data-reject-join="${request.id}">驳回</button>
+            </div>
+          </div>
+        `).join("") : "<p class=\"empty\">暂无待审核申请。</p>"}
+      </div>
+      ${reviewed.length ? `<div class="card"><h3>历史申请</h3>${reviewed.slice(0, 20).map(request => `
+        <div class="row-item"><div><strong>${h(request.name)}</strong><small>${h(request.status)} · ${h(request.reviewNote || "")}</small></div></div>
+      `).join("")}</div>` : ""}
+    </section>
+  `;
+}
+
+function renderAuth() {
+  if (state.authScreen === "change-password") {
+    app.innerHTML = `
+      <div class="auth-screen">
+        <div class="auth-card">
+          <div class="brand-mark big">D</div>
+          <h1>设置新密码</h1>
+          <p>为了账号安全，首次登录或重置后需要设置新密码（至少 8 位）。</p>
+          <form id="change-password-form">
+            <input type="password" name="oldPassword" placeholder="当前密码（初始密码）" autocomplete="current-password" />
+            <input type="password" name="newPassword" placeholder="新密码（至少 8 位）" required minlength="8" autocomplete="new-password" />
+            <input type="password" name="confirm" placeholder="再次输入新密码" required minlength="8" autocomplete="new-password" />
+            <button type="submit" class="primary">保存并继续</button>
+          </form>
+          <button class="link" data-back-login>返回登录</button>
+          <div class="auth-error"></div>
+        </div>
+      </div>`;
+    document.getElementById("change-password-form").addEventListener("submit", submitChangePassword);
+    document.querySelector("[data-back-login]").addEventListener("click", () => { setToken(""); state.authScreen = "login"; renderAuth(); });
+    return;
+  }
+  app.innerHTML = `
+    <div class="auth-screen">
+      <div class="auth-card">
+        <div class="brand-mark big">D</div>
+        <h1>D 大调合唱团管理后台</h1>
+        <p>请使用管理员邮箱或手机号登录</p>
+        <form id="login-form">
+          <input name="identifier" placeholder="邮箱或手机号" required autocomplete="username" />
+          <input type="password" name="password" placeholder="密码" required autocomplete="current-password" />
+          <button type="submit" class="primary">登录</button>
+        </form>
+        <small>成员请使用微信小程序登录 · 忘记密码请联系超级管理员</small>
+        <div class="auth-error"></div>
+      </div>
+    </div>`;
+  document.getElementById("login-form").addEventListener("submit", submitLogin);
+}
+
+function showAuthError(message) {
+  const el = document.querySelector(".auth-error");
+  if (el) el.textContent = message;
+}
+
+async function submitLogin(event) {
+  event.preventDefault();
+  const formData = new FormData(event.currentTarget);
+  try {
+    const result = await api.json("POST", "/api/auth/login", {
+      identifier: formData.get("identifier"),
+      password: formData.get("password")
+    });
+    setToken(result.token);
+    if (result.user?.mustChangePassword) {
+      state.authScreen = "change-password";
+      renderAuth();
+      return;
+    }
+    state.authScreen = "";
+    await refresh(true);
+    showToast("登录成功，欢迎回来");
+  } catch (error) {
+    showAuthError(error.message);
+  }
+}
+
+async function submitChangePassword(event) {
+  event.preventDefault();
+  const formData = new FormData(event.currentTarget);
+  if (formData.get("newPassword") !== formData.get("confirm")) {
+    showAuthError("两次输入的新密码不一致");
+    return;
+  }
+  try {
+    const result = await api.json("POST", "/api/auth/change-password", {
+      oldPassword: formData.get("oldPassword"),
+      newPassword: formData.get("newPassword")
+    });
+    if (result.token) setToken(result.token);
+    state.authScreen = "";
+    await refresh(true);
+    showToast("密码已更新");
+  } catch (error) {
+    showAuthError(error.message);
+  }
+}
+
+async function logout() {
+  try { await api.json("POST", "/api/auth/logout", {}); } catch {}
+  setToken("");
+  state.authScreen = "login";
+  state.data = null;
+  renderAuth();
+}
+
+async function createInvite(event) {
+  event.preventDefault();
+  const formData = new FormData(event.currentTarget);
+  const result = await api.json("POST", "/api/invites", {
+    code: formData.get("code") || "",
+    targetSection: formData.get("targetSection") || "",
+    maxUses: Number(formData.get("maxUses") || 0),
+    expiresAt: formData.get("expiresAt") ? `${formData.get("expiresAt")}T23:59:59` : ""
+  });
+  state.data.invites = result.invites;
+  render();
+  showToast(`邀请码 ${result.invite.code} 已生成`);
+}
+
+async function reviewJoin(requestId, approved) {
+  const sectionSelect = document.querySelector(`[data-join-section="${requestId}"]`);
+  const note = window.prompt(approved ? "给新成员一句欢迎语，可留空" : "请写一句温和说明", "") || "";
+  const result = await api.json("POST", `/api/join-requests/${requestId}/review`, {
+    approved,
+    note,
+    section: approved && sectionSelect ? sectionSelect.value : ""
+  });
+  hydrateFromPayload(result, approved ? "已通过入团申请，成员档案已创建" : "已驳回申请");
+}
+
+function bindAuthEvents() {
+  document.querySelectorAll("[data-logout]").forEach(button => button.addEventListener("click", logout));
+  document.querySelectorAll("[data-change-password]").forEach(button => button.addEventListener("click", () => { state.authScreen = "change-password"; renderAuth(); }));
+  const inviteForm = document.getElementById("invite-form");
+  if (inviteForm) inviteForm.addEventListener("submit", createInvite);
+  document.querySelectorAll("[data-disable-invite]").forEach(button => button.addEventListener("click", async () => {
+    const result = await api.json("POST", `/api/invites/${button.dataset.disableInvite}/disable`, {});
+    state.data.invites = result.invites;
+    render();
+    showToast("邀请码已停用");
+  }));
+  document.querySelectorAll("[data-approve-join]").forEach(button => button.addEventListener("click", () => reviewJoin(button.dataset.approveJoin, true)));
+  document.querySelectorAll("[data-reject-join]").forEach(button => button.addEventListener("click", () => reviewJoin(button.dataset.rejectJoin, false)));
+}
+
 function render() {
   app.innerHTML = shell();
   bindEvents();
+  bindAuthEvents();
 }
 
-refresh(true).catch(error => {
-  app.innerHTML = `<div class="boot">无法连接 API：${h(error.message)}<br />请确认本地或腾讯云服务已启动。</div>`;
-});
+if (!getToken()) {
+  state.authScreen = "login";
+  renderAuth();
+} else {
+  refresh(true).catch(error => {
+    if (state.authScreen) return; // 已切换到登录/改密界面
+    app.innerHTML = `<div class="boot">无法连接 API：${h(error.message)}<br />请确认本地或腾讯云服务已启动。</div>`;
+  });
+}

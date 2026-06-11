@@ -1,151 +1,136 @@
-# 正式环境部署文档
+# 正式环境部署文档（V2.1）
 
 ## 目标
 
-- API：`https://api.dmajorchoir.com`
-- 管理后台：`https://admin.dmajorchoir.com`
-- 数据库：SQLite，数据库文件保存在 `data/dmajor.sqlite`
-- 文件：当前 MVP 保存在服务器 `uploads/`，通过 API 鉴权访问；后续可迁移到私有对象存储
+- API：`https://api.dmajorchoir.com`（Nginx 443 → 127.0.0.1:4173）
+- 管理后台：`https://admin.dmajorchoir.com`（同一 Node 进程静态托管 `public/`）
+- 服务器：腾讯云 Ubuntu 22.04（119.45.176.130），Node ≥ 22.5 + PM2 + Nginx + Certbot
+- 数据与代码分离：
+  - 代码：`/home/ubuntu/d_major_APP`
+  - 数据库：`/home/ubuntu/d_major_runtime/data/dmajor.sqlite`
+  - 上传文件：`/home/ubuntu/d_major_runtime/uploads`
+  - 备份：`/home/ubuntu/d_major_runtime/backups`
 
-## 前置权限
-
-部署执行人需要准备：
-
-- Git 远程仓库地址和写入权限。
-- `dmajorchoir.com` DNS 管理权限。
-- 云服务器、容器平台或 PaaS 项目权限。
-- 服务器防火墙/安全组开放 `80`、`443`。
-- 微信小程序管理员或开发者权限。
-- TLS 证书自动签发权限，建议使用平台托管证书或 Let's Encrypt。
-
-## 1. Git 仓库
-
-```bash
-git init
-git add .
-git commit -m "Initial D Major Choir trial environment"
-git branch -M main
-git remote add origin <YOUR_GIT_REPOSITORY_URL>
-git push -u origin main
-```
-
-## 2. 正式域名与 DNS
-
-ICP备案已完成，正式环境使用域名访问。DNS 建议配置：
+## 1. DNS
 
 | 主机记录 | 类型 | 指向 |
 | --- | --- | --- |
 | `api` | `A` | `119.45.176.130` |
 | `admin` | `A` | `119.45.176.130` |
 
-## 3. 后端部署
+ICP 备案已完成，全部走域名 + HTTPS。
 
-推荐用容器或 Node 进程管理器部署：
+## 2. 首次部署 / 升级到 V2.1
 
 ```bash
-cp .env.example .env
-# 按服务器实际情况填写 .env，尤其是 ADMIN_ORIGIN、JWT_SECRET、FILE_SIGNING_SECRET
-# 当前版本没有第三方依赖，可跳过安装；后续如新增依赖，使用 npm install --omit=dev
-npm run db:backup || true
-npm run db:migrate
-npm run db:migrate-json
-mkdir -p uploads/resources uploads/recordings uploads/avatars
-NODE_ENV=production HOST=127.0.0.1 PORT=4173 ADMIN_ORIGIN=https://admin.dmajorchoir.com pm2 start server.js --name d-major-choir
+ssh ubuntu@119.45.176.130
+
+# 0) 升级前备份（老版本可用 npm run db:backup）
+cd /home/ubuntu/d_major_APP && npm run backup || npm run db:backup || true
+
+# 1) 拉取代码
+git pull origin main
+
+# 2) 准备运行时目录（首次）
+mkdir -p /home/ubuntu/d_major_runtime/{data,uploads,backups}
+# 如老库在代码目录内，迁移一次：
+[ -f data/dmajor.sqlite ] && cp -n data/dmajor.sqlite /home/ubuntu/d_major_runtime/data/
+[ -d uploads ] && cp -rn uploads/. /home/ubuntu/d_major_runtime/uploads/ || true
+
+# 3) 配置环境变量
+cp -n .env.example .env && vim .env
+```
+
+`.env` 生产关键项：
+
+```ini
+NODE_ENV=production
+PORT=4173
+ADMIN_ORIGIN=https://admin.dmajorchoir.com
+JWT_SECRET=<openssl rand -hex 32>
+FILE_SIGNING_SECRET=<openssl rand -hex 32>
+SESSION_TTL_HOURS=336
+
+SQLITE_DB_PATH=/home/ubuntu/d_major_runtime/data/dmajor.sqlite
+UPLOAD_DIR=/home/ubuntu/d_major_runtime/uploads
+BACKUP_DIR=/home/ubuntu/d_major_runtime/backups
+
+# 小程序正式登录（微信公众平台获取）
+WECHAT_APP_ID=wx开头的AppID
+WECHAT_APP_SECRET=小程序密钥（只放服务器 .env，严禁进 Git/小程序代码）
+
+# 首个管理员（create-admin 读取后即可从 .env 删除密码行）
+ADMIN_EMAIL=admin@dmajorchoir.com
+ADMIN_PASSWORD=一次性初始密码
+```
+
+```bash
+# 4) 迁移 + 管理员
+npm run migrate
+npm run seed            # 首次部署导入演示数据，可跳过
+npm run create-admin    # 首登强制改密
+
+# 5) 启动 / 重启
+pm2 start server.js --name dmajor-app || pm2 restart dmajor-app
 pm2 save
 ```
 
-反向代理：
+## 3. Nginx + HTTPS
 
 ```nginx
 server {
   listen 443 ssl http2;
-  server_name api.dmajorchoir.com;
+  server_name api.dmajorchoir.com admin.dmajorchoir.com;
+  ssl_certificate     /etc/letsencrypt/live/api.dmajorchoir.com/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/api.dmajorchoir.com/privkey.pem;
+  client_max_body_size 220m;
 
   location / {
     proxy_pass http://127.0.0.1:4173;
     proxy_set_header Host $host;
-    proxy_set_header X-Forwarded-Proto https;
+    proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto https;
   }
 }
-
 server {
-  listen 443 ssl http2;
-  server_name admin.dmajorchoir.com;
-
-  location / {
-    proxy_pass http://127.0.0.1:4173;
-    proxy_set_header Host $host;
-    proxy_set_header X-Forwarded-Proto https;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-  }
+  listen 80;
+  server_name api.dmajorchoir.com admin.dmajorchoir.com;
+  return 301 https://$host$request_uri;
 }
 ```
 
-健康检查：
+```bash
+sudo certbot --nginx -d api.dmajorchoir.com -d admin.dmajorchoir.com
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+## 4. 微信小程序
+
+1. 公众平台 →「开发管理 → 开发设置 → 服务器域名」：request / uploadFile / downloadFile 合法域名均加入 `https://api.dmajorchoir.com`。
+2. `miniprogram/config/index.js` 的 `ENV` 保持 `production`。
+3. 开发者工具上传体验版；体验成员通过后台生成的邀请码入团。
+4. 本地联调：`ENV` 改为 `development`（指向 `http://119.45.176.130:4173` 或本机），工具勾选"不校验合法域名"。未配置 `WECHAT_APP_SECRET` 时开发模式自动使用模拟 openid。
+
+## 5. 备份与恢复
 
 ```bash
-curl https://api.dmajorchoir.com/api/health
+npm run backup                       # SQLite + uploads → backups/<时间戳>/，保留 30 份
+npm run restore -- backups/<时间戳>   # 恢复（需输入 yes 确认），恢复后 pm2 restart dmajor-app
 ```
 
-预期返回 `status: ok`。
+建议 crontab 每日备份：`0 3 * * * cd /home/ubuntu/d_major_APP && npm run backup >> /home/ubuntu/d_major_runtime/backup.log 2>&1`
 
-## 4. Web 管理后台部署
-
-生产前将配置文件替换为：
+## 6. 验证
 
 ```bash
-cp public/config.production.example.js public/config.js
+curl -s https://api.dmajorchoir.com/api/health         # {"status":"ok","version":"2.1.0",...}
+curl -s https://api.dmajorchoir.com/api/bootstrap      # 应返回 401（未登录）
+API_BASE_URL=https://api.dmajorchoir.com ADMIN_EMAIL=... ADMIN_PASSWORD=... node scripts/smoke-test.js
 ```
 
-当前正式 MVP 仍由同一个 Node 服务托管 `public/`，访问 `https://admin.dmajorchoir.com` 即可进入管理后台。`public/config.js` 必须指向 `https://api.dmajorchoir.com`。
+> 注意：冒烟测试会写入测试数据（曲目/任务/邀请码/成员），生产环境建议在首次上线验收后清理，或仅在预发环境跑全量冒烟。
 
-## 5. 数据库 migration、seed 与备份
+## 7. 回滚
 
-```bash
-npm run db:backup
-npm run db:migrate
-npm run db:migrate-json
-```
-
-初始化内容：
-
-- 四个声部：女高、女低、男高、男低。
-- 角色：超级管理员、管理员、指挥、S/A/T/B 声部长、普通成员。
-- 测试曲目《月光》。
-- 总谱、四声部示范、伴奏音频的本地文件记录。
-- 活动签到、练习打卡点评、谱库查看播放三条闭环所需数据。
-
-## 6. 文件存储
-
-当前正式 MVP 使用服务器本地 `uploads/` 保存谱子、头像、录音和音频文件。不要把 `uploads/` 配成 Nginx 静态公开目录，文件必须通过 API 鉴权读取。
-
-推荐路径：
-
-```text
-uploads/resources/<file-id>-score.pdf
-uploads/resources/<file-id>-alto-demo.mp3
-uploads/recordings/<file-id>-practice.m4a
-uploads/avatars/<file-id>-avatar.jpg
-```
-
-访问流程：
-
-1. 前端请求 API：`GET /api/files/:fileId`。
-2. API 校验登录、合唱团、声部和资料权限。
-3. API 读取本地文件并返回。
-4. 后续迁移到腾讯云 COS 时，再改为 API 返回 5-10 分钟有效的临时签名 URL。
-
-## 7. 微信小程序体验版
-
-见 [docs/wechat-miniprogram.md](/Users/dc/Documents/Codex/2026-05-14/files-mentioned-by-the-user-d/docs/wechat-miniprogram.md)。
-
-## 8. 冒烟测试
-
-部署完成后执行：
-
-```bash
-API_BASE_URL=https://api.dmajorchoir.com npm run smoke
-```
-
-并填写 [docs/smoke-test-report.md](/Users/dc/Documents/Codex/2026-05-14/files-mentioned-by-the-user-d/docs/smoke-test-report.md)。
+见 `docs/rollback.md`：`git checkout <上一版本 tag>` + `npm run restore -- backups/<升级前备份>` + `pm2 restart dmajor-app`。
