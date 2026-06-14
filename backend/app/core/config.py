@@ -33,6 +33,13 @@ class Settings(BaseSettings):
     TENCENT_SMS_SDK_APP_ID: str = ""
     TENCENT_SMS_SIGN_NAME: str = ""
     TENCENT_SMS_TEMPLATE_ID: str = ""
+    COS_BUCKET: str = ""
+    COS_REGION: str = "ap-guangzhou"
+    COS_PREFIX: str = ""
+    COS_PUBLIC_BASE: str = ""
+    COS_SECRET_ID: str = ""
+    COS_SECRET_KEY: str = ""
+    COS_SYNC_WORK_TITLE: str = "COS谱库同步"
     ALLOW_LEGACY_USER_ID_TOKEN: bool = False
     ENABLE_PUBLIC_UPLOADS: bool = False
     FILE_SIGNED_URL_EXPIRE_SECONDS: int = 60 * 10

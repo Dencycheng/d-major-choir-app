@@ -10,3 +10,4 @@ pytest
 httpx
 qrcode[pil]
 tencentcloud-sdk-python
+cos-python-sdk-v5

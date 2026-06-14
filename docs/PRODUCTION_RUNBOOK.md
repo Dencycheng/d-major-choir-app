@@ -93,6 +93,40 @@ sudo docker-compose --env-file .env.production -f docker-compose.prod.yml exec b
 
 The script creates a work named `历史谱库恢复` and attaches supported PDF/audio/video files as resources.
 
+## Sync Tencent COS Library
+
+If score files already exist in Tencent COS, register them into the backend library after making sure a choir/admin exists.
+
+Add these values to `/home/ubuntu/choir_app_mvp/.env.production` on the Tencent Cloud server:
+
+```bash
+COS_BUCKET=your-bucket-name-1234567890
+COS_REGION=ap-guangzhou
+COS_PREFIX=optional/folder/prefix
+COS_PUBLIC_BASE=https://your-bucket-name-1234567890.cos.ap-guangzhou.myqcloud.com
+COS_SECRET_ID=your-secret-id
+COS_SECRET_KEY=your-secret-key
+COS_SYNC_WORK_TITLE=COS谱库同步
+```
+
+Then rebuild the backend and run a dry run first:
+
+```bash
+cd /home/ubuntu/choir_app_mvp
+sudo docker-compose --env-file .env.production -f docker-compose.prod.yml build backend
+sudo docker rm -f choir_app_mvp_backend_1
+sudo docker-compose --env-file .env.production -f docker-compose.prod.yml up -d backend
+sudo docker-compose --env-file .env.production -f docker-compose.prod.yml exec backend python -m app.tools.sync_cos_library --dry-run
+```
+
+If the dry run count is correct, run the real sync:
+
+```bash
+sudo docker-compose --env-file .env.production -f docker-compose.prod.yml exec backend python -m app.tools.sync_cos_library
+```
+
+The script creates works from COS folder names and resources from every non-empty object under `COS_PREFIX`. It is idempotent: running it again skips resources with the same COS URL. Private COS buckets are supported through `/api/resources/{resource_id}/signed-url` when COS credentials are configured.
+
 ## WeChat Miniapp
 
 Configure legal domains in the WeChat Mini Program console:
@@ -101,6 +135,12 @@ Configure legal domains in the WeChat Mini Program console:
 request:      https://api.dmajorchoir.com
 uploadFile:   https://api.dmajorchoir.com
 downloadFile: https://api.dmajorchoir.com
+```
+
+If miniapp users need to open COS-hosted scores directly, also add the COS bucket domain, for example:
+
+```text
+downloadFile: https://your-bucket-name-1234567890.cos.ap-guangzhou.myqcloud.com
 ```
 
 Use the real AppID in `miniapp/project.config.json` and upload a trial version before publishing.

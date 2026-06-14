@@ -49,25 +49,33 @@ async function getCurrentChoir() {
 function setCurrentChoir(choir) { wx.setStorageSync('choir_current', choir) }
 function logout() { wx.removeStorageSync('choir_token'); wx.removeStorageSync('choir_user'); wx.removeStorageSync('choir_current') }
 function assetIdFromUrl(fileUrl) { const m = (fileUrl || '').match(/\/api\/files\/([^/]+)\/download/); return m && m[1] }
+function fullUrl(url) { return url && (url.startsWith('http') ? url : baseUrl() + url) }
 async function getSignedDownloadUrl(fileUrl) {
   const assetId = assetIdFromUrl(fileUrl)
-  if (!assetId) return fileUrl && (fileUrl.startsWith('http') ? fileUrl : baseUrl() + fileUrl)
+  if (!assetId) return fullUrl(fileUrl)
   const res = await request(`/api/files/${assetId}/signed-url`)
-  return baseUrl() + res.signed_url
+  return fullUrl(res.signed_url)
 }
-async function openDocument(fileUrl, fileType) {
-  const url = await getSignedDownloadUrl(fileUrl)
+async function getResourceDownloadUrl(input) {
+  if (input && typeof input === 'object' && input.resource_id) {
+    const res = await request(`/api/resources/${input.resource_id}/signed-url`)
+    return fullUrl(res.signed_url || input.file_url)
+  }
+  return getSignedDownloadUrl(input)
+}
+async function openDocument(fileUrlOrResource, fileType) {
+  const url = await getResourceDownloadUrl(fileUrlOrResource)
   wx.showLoading({ title: '打开中' })
   wx.downloadFile({ url, success(res) { wx.hideLoading(); if (res.statusCode === 200) wx.openDocument({ filePath: res.tempFilePath, fileType: fileType || undefined, showMenu: true }); else wx.showToast({ title: '下载失败', icon: 'none' }) }, fail() { wx.hideLoading(); wx.showToast({ title: '打开失败', icon: 'none' }) } })
 }
-async function playAudio(fileUrl) {
-  const url = await getSignedDownloadUrl(fileUrl)
+async function playAudio(fileUrlOrResource) {
+  const url = await getResourceDownloadUrl(fileUrlOrResource)
   const audio = wx.createInnerAudioContext(); audio.src = url; audio.play(); wx.showToast({ title: '开始播放', icon: 'none' }); return audio
 }
-async function openVideo(fileUrl) {
-  const url = await getSignedDownloadUrl(fileUrl)
+async function openVideo(fileUrlOrResource) {
+  const url = await getResourceDownloadUrl(fileUrlOrResource)
   wx.setStorageSync('choir_current_video_url', url)
   wx.navigateTo({ url: '/pages/library/library?video=1' })
   return url
 }
-module.exports = { request, uploadFile, sendLoginCode, login, logout, myChoirs, getCurrentChoir, setCurrentChoir, setBaseUrl, getSignedDownloadUrl, openDocument, playAudio, openVideo }
+module.exports = { request, uploadFile, sendLoginCode, login, logout, myChoirs, getCurrentChoir, setCurrentChoir, setBaseUrl, getSignedDownloadUrl, getResourceDownloadUrl, openDocument, playAudio, openVideo }

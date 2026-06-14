@@ -22,16 +22,22 @@ const nowLocal = () => new Date(Date.now() + 8 * 3600 * 1000).toISOString().slic
 const twoHoursLater = () => new Date(Date.now() + 10 * 3600 * 1000).toISOString().slice(0, 16)
 const toIso = (v: string) => new Date(v).toISOString()
 const fileAssetIdFromUrl = (url?: string) => url?.match(/\/api\/files\/([^/]+)\/download/)?.[1]
+const absoluteUrl = (url: string) => url.startsWith('http') ? url : `${API_BASE}${url}`
 
-async function openProtectedFile(fileUrl?: string) {
+async function openProtectedFile(fileUrl?: string, resourceId?: string) {
   if (!fileUrl) return
+  if (resourceId) {
+    const res = await api<{ signed_url: string }>(`/api/resources/${resourceId}/signed-url`)
+    window.open(absoluteUrl(res.signed_url), '_blank')
+    return
+  }
   const assetId = fileAssetIdFromUrl(fileUrl)
   if (!assetId) {
-    window.open(fileUrl.startsWith('http') ? fileUrl : `${API_BASE}${fileUrl}`, '_blank')
+    window.open(absoluteUrl(fileUrl), '_blank')
     return
   }
   const res = await api<{ signed_url: string }>(`/api/files/${assetId}/signed-url`)
-  window.open(`${API_BASE}${res.signed_url}`, '_blank')
+  window.open(absoluteUrl(res.signed_url), '_blank')
 }
 
 function errorText(err: unknown) {
@@ -319,7 +325,7 @@ function Works({choirId, rows, onDone}:{choirId:string; rows: WorkRow[]; onDone:
   async function create(){ if(!title.trim()) return alert('作品名称不能为空'); await api(`/api/choirs/${choirId}/works`,{method:'POST',body:JSON.stringify({title,composer,language:'English',status:'practicing'})}); await onDone() }
   async function loadResources(workId:string){ setSelectedWork(workId); if(workId){ setResources(await api<ResourceRow[]>(`/api/works/${workId}/resources`)) } }
   async function bindResource(){ if(!selectedWork || !file) return alert('请先选择作品和文件'); const uploaded = await uploadFile(file, { choir_id: choirId, purpose: 'resource' }); const resourceType = file.type.startsWith('video') ? 'video_score' : file.type.startsWith('audio') ? 'section_audio' : 'score_full'; await api(`/api/works/${selectedWork}/resources`,{method:'POST',body:JSON.stringify({resource_name:resourceName,resource_type:resourceType,file_url:uploaded.file_url,file_format:file.name.split('.').pop(),visibility:'all'})}); await loadResources(selectedWork); await onDone() }
-  return <div><div className="inline-form"><input value={title} onChange={e=>setTitle(e.target.value)}/><input value={composer} onChange={e=>setComposer(e.target.value)}/><button onClick={create}>创建作品</button></div><div className="inline-form"><select value={selectedWork} onChange={e=>loadResources(e.target.value)}><option value="">选择作品绑定文件</option>{rows.map(w=><option key={w.work_id} value={w.work_id}>{w.title}</option>)}</select><input value={resourceName} onChange={e=>setResourceName(e.target.value)}/><input type="file" onChange={e=>setFile(e.target.files?.[0] || null)}/><button onClick={bindResource}>上传并绑定</button></div><div className="table"><div className="row head"><span>作品</span><span>作曲</span><span>语言</span><span>状态</span></div>{rows.map(w=><div className="row" key={w.work_id}><span>{w.title}</span><span>{w.composer || '-'}</span><span>{w.language || '-'}</span><span>{w.status}</span></div>)}</div>{selectedWork && <><h3>已绑定文件</h3><div className="table"><div className="row head"><span>名称</span><span>类型</span><span>格式</span><span>预览</span></div>{resources.map(r=><div className="row" key={r.resource_id}><span>{r.resource_name}</span><span>{r.resource_type}</span><span>{r.file_format}</span><span><button className="tiny" onClick={()=>openProtectedFile(r.file_url)}>打开</button></span></div>)}</div></>}</div>
+  return <div><div className="inline-form"><input value={title} onChange={e=>setTitle(e.target.value)}/><input value={composer} onChange={e=>setComposer(e.target.value)}/><button onClick={create}>创建作品</button></div><div className="inline-form"><select value={selectedWork} onChange={e=>loadResources(e.target.value)}><option value="">选择作品绑定文件</option>{rows.map(w=><option key={w.work_id} value={w.work_id}>{w.title}</option>)}</select><input value={resourceName} onChange={e=>setResourceName(e.target.value)}/><input type="file" onChange={e=>setFile(e.target.files?.[0] || null)}/><button onClick={bindResource}>上传并绑定</button></div><div className="table"><div className="row head"><span>作品</span><span>作曲</span><span>语言</span><span>状态</span></div>{rows.map(w=><div className="row" key={w.work_id}><span>{w.title}</span><span>{w.composer || '-'}</span><span>{w.language || '-'}</span><span>{w.status}</span></div>)}</div>{selectedWork && <><h3>已绑定文件</h3><div className="table"><div className="row head"><span>名称</span><span>类型</span><span>格式</span><span>预览</span></div>{resources.map(r=><div className="row" key={r.resource_id}><span>{r.resource_name}</span><span>{r.resource_type}</span><span>{r.file_format}</span><span><button className="tiny" onClick={()=>openProtectedFile(r.file_url, r.resource_id)}>打开</button></span></div>)}</div></>}</div>
 }
 
 function Tasks({choirId, rows, works, sections, firstSection, onDone}:{choirId:string; rows: TaskRow[]; works: WorkRow[]; sections: Section[]; firstSection:string; onDone:()=>void}) {

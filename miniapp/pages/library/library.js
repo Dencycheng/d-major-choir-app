@@ -24,12 +24,12 @@ Page({
     if (!item) return
     const format = (item.file_format || '').toLowerCase()
     if (['mp4', 'mov', 'm4v'].includes(format) || String(item.resource_type).includes('video')) {
-      const url = await openVideo(item.file_url)
+      const url = await openVideo(item)
       this.setData({ videoUrl: url })
     } else if (['mp3', 'wav', 'm4a'].includes(format) || item.resource_type === 'audio') {
-      await playAudio(item.file_url)
+      await playAudio(item)
     } else {
-      await openDocument(item.file_url, format === 'pdf' ? 'pdf' : undefined)
+      await openDocument(item, format === 'pdf' ? 'pdf' : undefined)
     }
   },
   onRate(e) {

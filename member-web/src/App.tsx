@@ -15,16 +15,26 @@ type Notice = { type: 'ok'|'error'|'info'; text: string }
 
 const formatTime = (v?: string) => v ? new Date(v).toLocaleString('zh-CN', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }) : '-'
 const fileAssetIdFromUrl = (url?: string) => url?.match(/\/api\/files\/([^/]+)\/download/)?.[1]
+const absoluteUrl = (url: string) => url.startsWith('http') ? url : `${API_BASE}${url}`
 
-async function openProtectedFile(fileUrl?: string) {
+async function signedResourceUrl(resourceId: string, fallbackUrl: string) {
+  const res = await api<{ signed_url: string }>(`/api/resources/${resourceId}/signed-url`)
+  return absoluteUrl(res.signed_url || fallbackUrl)
+}
+
+async function openProtectedFile(fileUrl?: string, resourceId?: string) {
   if (!fileUrl) return
+  if (resourceId) {
+    window.open(await signedResourceUrl(resourceId, fileUrl), '_blank')
+    return
+  }
   const assetId = fileAssetIdFromUrl(fileUrl)
   if (!assetId) {
-    window.open(fileUrl.startsWith('http') ? fileUrl : `${API_BASE}${fileUrl}`, '_blank')
+    window.open(absoluteUrl(fileUrl), '_blank')
     return
   }
   const res = await api<{ signed_url: string }>(`/api/files/${assetId}/signed-url`)
-  window.open(`${API_BASE}${res.signed_url}`, '_blank')
+  window.open(absoluteUrl(res.signed_url), '_blank')
 }
 
 function errorText(err: unknown) { return err instanceof Error ? err.message : String(err) }
@@ -307,7 +317,7 @@ export default function App() {
       </section>
       <section className="card">
         <h2>{selectedWork?.title || '作品资料'}</h2>
-        {resources.map(r => <article className="resource" key={r.resource_id}><div><strong>{r.resource_name}</strong><p>{r.resource_type} · {r.file_format || 'file'}</p></div><button onClick={async()=>{ const f=(r.file_format||'').toLowerCase(); if (['mp4','mov','m4v'].includes(f) || r.resource_type.includes('video')) { const assetId=fileAssetIdFromUrl(r.file_url); if(assetId){ const res=await api<{signed_url:string}>(`/api/files/${assetId}/signed-url`); setVideoUrl(`${API_BASE}${res.signed_url}`) } else setVideoUrl(r.file_url) } else openProtectedFile(r.file_url) }}>打开</button></article>)}
+        {resources.map(r => <article className="resource" key={r.resource_id}><div><strong>{r.resource_name}</strong><p>{r.resource_type} · {r.file_format || 'file'}</p></div><button onClick={async()=>{ const f=(r.file_format||'').toLowerCase(); if (['mp4','mov','m4v'].includes(f) || r.resource_type.includes('video')) { setVideoUrl(await signedResourceUrl(r.resource_id, r.file_url)) } else openProtectedFile(r.file_url, r.resource_id) }}>打开</button></article>)}
         {videoUrl && <div className="video-player"><video src={videoUrl} controls /><div className="actions">{[0.75,1,1.25,1.5].map(rate=><button className="ghost" key={rate} onClick={()=>{ const v=document.querySelector('.video-player video') as HTMLVideoElement | null; if(v) v.playbackRate=rate }}>{rate}x</button>)}</div></div>}
         {!resources.length && <p>请选择一个作品查看资料。</p>}
       </section>
