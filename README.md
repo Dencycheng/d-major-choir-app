@@ -2,6 +2,8 @@
 
 本版本基于 D Major Choir Logo 完成视觉升级，并增强活动地点与周期排练体验。
 
+生产部署、备份、恢复、Nginx 和内测验证码模式见：[docs/PRODUCTION_RUNBOOK.md](docs/PRODUCTION_RUNBOOK.md)。
+
 - 管理后台：http://127.0.0.1:8080
 - 成员端网页：http://127.0.0.1:8090
 - 后端健康检查：http://127.0.0.1:8000/health

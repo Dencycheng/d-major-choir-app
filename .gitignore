@@ -12,4 +12,5 @@ uploads/*
 backend/uploads/*
 !backend/uploads/.gitkeep
 d-major-choir-app-github-v1/
+backups/
 .DS_Store

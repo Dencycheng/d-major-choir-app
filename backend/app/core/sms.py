@@ -93,11 +93,18 @@ def send_sms_code(db: Session, mobile: str, purpose: str = "login") -> dict[str,
     if latest and (current - latest.sent_at).total_seconds() < settings.SMS_RESEND_INTERVAL_SECONDS:
         raise HTTPException(429, "Verification code was sent too recently")
 
-    code = "000000" if settings.SMS_PROVIDER == "mock" else generate_sms_code()
     provider_response: Any = {"mock": True}
-    if settings.SMS_PROVIDER == "tencent":
+    if settings.SMS_PROVIDER == "mock":
+        code = "000000"
+    elif settings.SMS_PROVIDER == "internal":
+        if not settings.INTERNAL_LOGIN_CODE:
+            raise HTTPException(500, "Missing internal login code")
+        code = settings.INTERNAL_LOGIN_CODE.strip()
+        provider_response = {"internal": True}
+    elif settings.SMS_PROVIDER == "tencent":
+        code = generate_sms_code()
         provider_response = send_tencent_sms(mobile, code)
-    elif settings.SMS_PROVIDER != "mock":
+    else:
         raise HTTPException(500, "Unsupported SMS provider")
 
     row = SmsVerificationCode(
@@ -116,7 +123,7 @@ def send_sms_code(db: Session, mobile: str, purpose: str = "login") -> dict[str,
         "mobile": mobile,
         "purpose": purpose,
         "expires_in": settings.SMS_CODE_EXPIRE_SECONDS,
-        "message": "Verification code sent",
+        "message": "请输入管理员提供的内测验证码" if settings.SMS_PROVIDER == "internal" else "Verification code sent",
         "debug_code": code if settings.SMS_PROVIDER == "mock" else None,
     }
 
@@ -145,6 +152,8 @@ def verify_sms_code(db: Session, mobile: str, code: str, purpose: str = "login")
 
 def can_create_user_for_mobile(db: Session, mobile: str) -> bool:
     if settings.AUTH_ALLOW_OPEN_REGISTRATION:
+        return True
+    if settings.AUTH_ALLOW_FIRST_USER_BOOTSTRAP and db.query(User).count() == 0:
         return True
     return (
         db.query(ChoirMember)

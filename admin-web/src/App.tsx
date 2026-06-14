@@ -40,8 +40,8 @@ function errorText(err: unknown) {
 }
 
 export default function App() {
-  const [mobile, setMobile] = useState('13800000000')
-  const [name, setName] = useState('Admin')
+  const [mobile, setMobile] = useState('')
+  const [name, setName] = useState('')
   const [smsCode, setSmsCode] = useState('')
   const [choirs, setChoirs] = useState<Choir[]>([])
   const [selected, setSelected] = useState<Choir | null>(null)
@@ -67,7 +67,7 @@ export default function App() {
     setBusy(true)
     try {
       const res = await sendLoginCode(mobile.trim())
-      notify('ok', res.debug_code ? `验证码已发送：${res.debug_code}` : '验证码已发送。')
+      notify('ok', res.debug_code ? `验证码已发送：${res.debug_code}` : res.message || '验证码已发送。')
     } catch (err) { notify('error', errorText(err)) }
     finally { setBusy(false) }
   }
@@ -137,8 +137,8 @@ export default function App() {
     <section className="card grid">
       <div>
         <h2>1. 管理员登录</h2>
-        <label>手机号</label><input value={mobile} onChange={e=>setMobile(e.target.value)} />
-        <label>姓名</label><input value={name} onChange={e=>setName(e.target.value)} />
+        <label>手机号</label><input value={mobile} onChange={e=>setMobile(e.target.value)} placeholder="请输入管理员手机号" />
+        <label>姓名</label><input value={name} onChange={e=>setName(e.target.value)} placeholder="请输入姓名" />
         <label>短信验证码</label><input value={smsCode} onChange={e=>setSmsCode(e.target.value)} placeholder="6位验证码" />
         <button className="secondary" disabled={busy} onClick={handleSendCode}>发送验证码</button>
         <button disabled={busy} onClick={handleLogin}>{busy ? '处理中...' : '登录'}</button>

@@ -30,8 +30,8 @@ async function openProtectedFile(fileUrl?: string) {
 function errorText(err: unknown) { return err instanceof Error ? err.message : String(err) }
 
 export default function App() {
-  const [mobile, setMobile] = useState('13900000001')
-  const [name, setName] = useState('合唱团成员')
+  const [mobile, setMobile] = useState('')
+  const [name, setName] = useState('')
   const [smsCode, setSmsCode] = useState('')
   const [inviteCode, setInviteCode] = useState('')
   const [choirs, setChoirs] = useState<Choir[]>([])
@@ -87,14 +87,16 @@ export default function App() {
   useEffect(() => { if (selected) loadAll(selected).catch(e => notify('error', errorText(e))) }, [selected?.choir_id])
 
   async function sendCode() {
+    if (!mobile.trim()) return notify('error', '请先输入手机号')
     setBusy(true)
     try {
       const res = await sendLoginCode(mobile)
-      notify('ok', res.debug_code ? `验证码已发送：${res.debug_code}` : '验证码已发送')
+      notify('ok', res.debug_code ? `验证码已发送：${res.debug_code}` : res.message || '验证码已发送')
     } catch (e) { notify('error', errorText(e)) } finally { setBusy(false) }
   }
 
   async function doLogin() {
+    if (!mobile.trim()) return notify('error', '请先输入手机号')
     if (!smsCode.trim()) return notify('error', '请先输入短信验证码')
     setBusy(true)
     try {

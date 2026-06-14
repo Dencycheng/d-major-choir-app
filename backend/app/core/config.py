@@ -21,7 +21,9 @@ class Settings(BaseSettings):
     AUTO_CREATE_TABLES: bool = True
     ALLOW_DEMO_LOGIN_CODE: bool = True
     AUTH_ALLOW_OPEN_REGISTRATION: bool = True
+    AUTH_ALLOW_FIRST_USER_BOOTSTRAP: bool = True
     SMS_PROVIDER: str = "mock"
+    INTERNAL_LOGIN_CODE: str = ""
     SMS_CODE_EXPIRE_SECONDS: int = 300
     SMS_RESEND_INTERVAL_SECONDS: int = 60
     SMS_MAX_VERIFY_ATTEMPTS: int = 5

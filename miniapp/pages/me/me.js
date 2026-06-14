@@ -1,6 +1,6 @@
 const { login, sendLoginCode, logout, request, myChoirs, setCurrentChoir, setBaseUrl } = require('../../utils/api')
 Page({
-  data: { user: null, choirs: [], choirNames: [], currentChoir: null, mobile: '13900000001', name: '合唱团成员', smsCode: '', inviteCode: '', apiBase: 'https://api.dmajorchoir.com', loading: false },
+  data: { user: null, choirs: [], choirNames: [], currentChoir: null, mobile: '', name: '', smsCode: '', inviteCode: '', apiBase: 'https://api.dmajorchoir.com', loading: false },
   onShow() { this.load() },
   onMobile(e) { this.setData({ mobile: e.detail.value }) },
   onName(e) { this.setData({ name: e.detail.value }) },
@@ -14,15 +14,17 @@ Page({
     this.setData({ loading: true })
     try {
       const res = await sendLoginCode(mobile)
-      wx.showToast({ title: res.debug_code ? `验证码 ${res.debug_code}` : '验证码已发送', icon: 'none' })
+      wx.showToast({ title: res.debug_code ? `验证码 ${res.debug_code}` : (res.message || '验证码已发送'), icon: 'none' })
     } catch (err) { wx.showToast({ title: '发送失败', icon: 'none' }) }
     finally { this.setData({ loading: false }) }
   },
   async onLogin() {
+    const mobile = this.data.mobile.trim()
     const code = this.data.smsCode.trim()
+    if (!mobile) return wx.showToast({ title: '请输入手机号', icon: 'none' })
     if (!code) return wx.showToast({ title: '请输入验证码', icon: 'none' })
     this.setData({ loading: true })
-    try { const res = await login(this.data.mobile.trim(), code, this.data.name.trim()); wx.showToast({ title: '登录成功', icon: 'success' }); this.setData({ user: res.user }); await this.load() }
+    try { const res = await login(mobile, code, this.data.name.trim()); wx.showToast({ title: '登录成功', icon: 'success' }); this.setData({ user: res.user }); await this.load() }
     catch (err) { wx.showToast({ title: '登录失败', icon: 'none' }) }
     finally { this.setData({ loading: false }) }
   },
